@@ -2,740 +2,159 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>صورة من بلدي</title>
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإشراف — صورة من بلدي</title>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --night:#141210; --card:#1E1A16; --card2:#26211B;
-  --sand:#E8CF9F; --sand-dim:#B29B72;
-  --sadu:#C0392B; --sadu-deep:#8E2A20;
-  --palm:#4E7A4C; --star:#F2B33D;
-  --line:#332C24; --txt:#F3EADB; --txt-dim:#A69880;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);max-width:520px;margin:0 auto;padding-bottom:86px;min-height:100vh}
-.sadu{height:10px;background:repeating-linear-gradient(45deg,var(--sadu) 0 8px,var(--night) 8px 16px,var(--sand) 16px 24px,var(--night) 24px 32px)}
-header{padding:18px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:linear-gradient(var(--night) 78%,transparent)}
-.logo{font-family:'Reem Kufi',sans-serif;font-size:26px;font-weight:700;color:var(--sand);line-height:1}
-.logo span{font-size:13px;display:block;font-family:'Tajawal';font-weight:500;color:var(--txt-dim);margin-top:3px}
-.count-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--sand-dim)}
-.filters{padding:6px 18px 14px;display:flex;flex-direction:column;gap:10px}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px}
-.search-box input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:'Tajawal';font-size:14px}
-.search-box input::placeholder{color:var(--txt-dim)}
-.sel-row{display:flex;gap:8px}
-select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;appearance:none}
-.sort-tabs{display:flex;gap:8px}
-.sort-tab{flex:1;text-align:center;padding:9px;border-radius:12px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--line);color:var(--txt-dim);cursor:pointer;transition:.2s}
-.sort-tab.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
-.feed{padding:0 18px;display:flex;flex-direction:column;gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .15s}
-.card:active{transform:scale(.98)}
-.ph{position:relative;height:210px;overflow:hidden;background:var(--card2)}
-.ph img{width:100%;height:100%;object-fit:cover;display:block}
-.medal{position:absolute;top:10px;right:10px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border-radius:12px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--star);display:flex;align-items:center;gap:5px}
-.badge-tag{position:absolute;top:10px;left:10px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border:1px solid var(--sadu);border-radius:12px;padding:4px 10px;font-size:11px;color:var(--sand);font-weight:700}
-.loc-chip{position:absolute;bottom:10px;right:10px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border-radius:12px;padding:5px 11px;font-size:12px;color:var(--sand)}
-.card-body{padding:12px 14px 14px}
-.card-title{font-size:16px;font-weight:700;margin-bottom:4px}
-.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--txt-dim)}
-.stars-mini{color:var(--star);letter-spacing:1px;font-size:13px}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;display:none;align-items:flex-end;justify-content:center}
-.overlay.show{display:flex}
-.sheet{background:var(--night);width:100%;max-width:520px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
-@keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
-.sheet .ph{height:250px;border-radius:0}
-.sheet-body{padding:16px 20px 30px}
-.sheet-title{font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--sand)}
-.sheet-loc{color:var(--txt-dim);font-size:13px;margin:4px 0 14px;line-height:1.7}
-.rate-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;margin-bottom:16px}
-.rate-label{font-size:13px;color:var(--txt-dim);margin-bottom:8px}
-.big-stars{display:flex;justify-content:center;gap:10px;direction:ltr}
-.big-stars button{background:none;border:none;font-size:30px;color:var(--line);cursor:pointer;transition:.15s;padding:2px}
-.big-stars button.lit{color:var(--star)}
-.rate-avg{margin-top:10px;font-size:13px;color:var(--sand-dim)}
-.thanks{color:var(--palm);font-size:13px;margin-top:8px;display:none}
-.poll-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
-.poll-title{font-size:14px;font-weight:700;margin-bottom:10px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-size:12.5px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s}
-.chip .n{background:var(--night);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--sand-dim)}
-.chip.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
-.chip.on .n{background:rgba(0,0,0,.25);color:#fff}
-.chip:active{transform:scale(.95)}
-.comments-h{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.comment{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px}
-.comment b{color:var(--sand);display:block;font-size:12px;margin-bottom:3px}
-.c-input{display:flex;gap:8px;margin-top:12px}
-.c-input input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';outline:none;font-size:13px}
-.btn{background:var(--sadu);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:'Tajawal';font-weight:700;font-size:14px;cursor:pointer}
-.btn:active{background:var(--sadu-deep)}
+:root{--night:#141210;--card:#1E1A16;--card2:#26211B;--sand:#E8CF9F;--sand-dim:#B29B72;--sadu:#C0392B;--palm:#4E7A4C;--star:#F2B33D;--line:#332C24;--txt:#F3EADB;--txt-dim:#A69880}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);max-width:560px;margin:0 auto;padding:0 16px 60px;min-height:100vh}
+.sadu{height:8px;margin:0 -16px;background:repeating-linear-gradient(45deg,var(--sadu) 0 8px,var(--night) 8px 16px,var(--sand) 16px 24px,var(--night) 24px 32px)}
+h1{font-family:'Reem Kufi',sans-serif;color:var(--sand);font-size:22px;padding:18px 0 4px}
+.sub{color:var(--txt-dim);font-size:13px;margin-bottom:18px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px}
+.btn{background:var(--sadu);color:#fff;border:none;border-radius:12px;padding:11px 16px;font-family:'Tajawal';font-weight:700;font-size:13px;cursor:pointer}
+.btn.grn{background:var(--palm)}
+.btn.gry{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
 .btn:disabled{opacity:.5}
-.close-x{position:sticky;top:10px;margin:10px 18px -40px auto;z-index:5;width:34px;height:34px;border-radius:50%;background:rgba(20,18,16,.85);color:var(--txt);border:1px solid var(--line);font-size:16px;cursor:pointer;display:block}
-.form{padding:6px 20px 160px}
-.form h2{font-family:'Reem Kufi',sans-serif;color:var(--sand);font-size:22px;margin-bottom:4px}
-.form p.hint{color:var(--txt-dim);font-size:13px;margin-bottom:18px}
-.f-group{margin-bottom:14px}
-.f-group label{display:block;font-size:13px;color:var(--sand-dim);margin-bottom:6px;font-weight:500}
-.f-group input,.f-group select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none}
-.cap-row{display:flex;gap:10px;margin-bottom:14px}
-.cap-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 10px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;transition:.15s}
-.cap-btn b{font-size:14px}
-.cap-btn small{font-size:11px;color:var(--txt-dim);font-weight:400}
-.cap-btn.live{border-color:var(--sadu);background:linear-gradient(160deg,var(--card),rgba(192,57,43,.14))}
-.cap-btn:active{transform:scale(.96)}
-.geo-card{background:var(--card);border:1px solid var(--palm);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13px}
-.geo-card.warn{border-color:var(--star)}
-.geo-status{font-weight:700;color:var(--palm);margin-bottom:3px}
-.geo-card.warn .geo-status{color:var(--star)}
-.geo-coords{color:var(--txt-dim);font-size:12px;direction:ltr;text-align:right}
-.drop{border:2px dashed var(--line);border-radius:18px;padding:20px;text-align:center;color:var(--txt-dim);margin-bottom:16px;background:var(--card)}
-.drop.has{border-color:var(--palm);color:var(--palm)}
-.drop img{max-width:100%;max-height:200px;border-radius:12px;margin-top:10px}
-.submit-btn{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:480px;z-index:35;padding:15px;font-size:16px;box-shadow:0 6px 20px rgba(192,57,43,.5)}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
-.nav-btn{flex:1;background:none;border:none;color:var(--txt-dim);font-family:'Tajawal';font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px}
-.nav-btn .ic{font-size:20px}
-.nav-btn.on{color:var(--sand)}
-.nav-btn.add-main{position:relative;top:-16px}
-.nav-btn.add-main .ic{width:52px;height:52px;border-radius:50%;background:var(--sadu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px rgba(192,57,43,.45)}
-.empty{text-align:center;padding:50px 30px;color:var(--txt-dim);font-size:14px;line-height:1.9}
-.empty .big{font-size:40px;display:block;margin-bottom:8px}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--palm);color:#fff;padding:11px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:99;display:none;white-space:nowrap}
+.btn-w{width:100%;padding:13px;font-size:15px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;text-align:center;padding:10px;border-radius:12px;font-size:13px;background:var(--card);border:1px solid var(--line);color:var(--txt-dim);cursor:pointer}
+.tab.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.pcard img{width:100%;height:170px;object-fit:cover;display:block}
+.pbody{padding:12px 14px}
+.ptitle{font-weight:700;font-size:15px;margin-bottom:4px}
+.pmeta{font-size:12px;color:var(--txt-dim);margin-bottom:10px;line-height:1.8}
+.flags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.flag{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700}
+.flag.rep{background:rgba(242,179,61,.15);color:var(--star);border:1px solid var(--star)}
+.flag.hid{background:rgba(192,57,43,.15);color:var(--sadu);border:1px solid var(--sadu)}
+.flag.ban{background:rgba(192,57,43,.3);color:#fff;border:1px solid var(--sadu)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--txt-dim);padding:40px 20px;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--palm);color:#fff;padding:11px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:99;display:none;white-space:nowrap}
 .toast.err{background:var(--sadu)}
-.loader{text-align:center;padding:40px;color:var(--txt-dim);font-size:14px}
-.page{display:none}.page.on{display:block}
+#panel{display:none}
+.topbar{display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
-
 <div class="sadu"></div>
-<header>
-  <div class="logo" onclick="logoTap()">صورة من بلدي<span>عدسات أهل الديار</span></div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <button id="admGear" style="display:none;background:var(--card);border:1px solid var(--sadu);border-radius:50%;width:36px;height:36px;font-size:17px;cursor:pointer;color:var(--sand)" onclick="openAdmin()">⚙️</button>
-    <div class="count-pill" id="totalPill">...</div>
-  </div>
-</header>
-
-<div class="page on" id="page-feed">
-  <div class="filters">
-    <div class="search-box">🔎<input id="q" placeholder="ابحث باسم القرية أو المكان..." oninput="render()"></div>
-    <div class="sel-row">
-      <select id="fRegion" onchange="fillCities();render()"><option value="">كل المناطق</option></select>
-      <select id="fCity" onchange="render()"><option value="">كل المدن</option></select>
-    </div>
-    <div class="sort-tabs">
-      <div class="sort-tab on" id="tabTop" onclick="setSort('top')">⭐ الأعلى تقييماً</div>
-      <div class="sort-tab" id="tabNew" onclick="setSort('new')">🕐 الأحدث</div>
-    </div>
-  </div>
-  <div class="feed" id="feed"><div class="loader">⏳ نحمّل الصور...</div></div>
+<div class="topbar">
+  <div><h1>👮 لوحة الإشراف</h1><div class="sub">صورة من بلدي — للمشرف فقط</div></div>
+  <button class="btn gry" id="outBtn" style="display:none" onclick="logout()">خروج</button>
 </div>
 
-<div class="page" id="page-add">
-  <div class="form">
-    <h2>شارك صورة من ديرتك</h2>
-    <p class="hint">صوّر أجمل ما في منطقتك وخلّ الناس تقيّم</p>
-    <div class="cap-row">
-      <button class="cap-btn live" onclick="document.getElementById('fileLive').click()">📸<b>التقط لايف</b><small>كاميرا + موقعك الآن</small></button>
-      <button class="cap-btn" onclick="document.getElementById('fileGal').click()">🖼️<b>من المعرض</b><small>نقرأ موقع الصورة</small></button>
-    </div>
-    <div class="drop" id="drop" style="display:none">
-      <span id="dropTxt"></span>
-      <img id="preview" style="display:none">
-    </div>
-    <div class="geo-card" id="geoCard" style="display:none">
-      <div class="geo-status" id="geoStatus"></div>
-      <div class="geo-coords" id="geoCoords"></div>
-    </div>
-    <input type="file" id="fileLive" accept="image/*" capture="environment" style="display:none" onchange="pickImg(this,true)">
-    <input type="file" id="fileGal" accept="image/*" style="display:none" onchange="pickImg(this,false)">
-    <div class="f-group"><label>عنوان الصورة</label><input id="aTitle" placeholder="مثال: غروب على جبال السودة"></div>
-    <div class="f-group"><label>المنطقة</label><select id="aRegion" onchange="fillAddCities()"></select></div>
-    <div class="f-group"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
-    <div class="f-group"><label>القرية أو الحي (اختياري)</label><input id="aVillage" placeholder="مثال: قرية رجال ألمع"></div>
-    <div class="f-group"><label>اسمك</label><input id="aName" placeholder="أبو الذيابة"></div>
-    <button class="btn submit-btn" id="pubBtn" onclick="addPhoto()">انشر الصورة 🚀</button>
-  </div>
+<div class="box" id="loginBox">
+  <input type="email" id="email" placeholder="إيميل المشرف" autocomplete="username">
+  <input type="password" id="pass" placeholder="كلمة السر" autocomplete="current-password">
+  <button class="btn btn-w" id="inBtn" onclick="login()">دخول</button>
 </div>
 
-<div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
-  <div class="sheet">
-    <button class="close-x" onclick="closeSheet()">✕</button>
-    <div class="ph" id="sPh"></div>
-    <div class="sheet-body">
-      <div class="sheet-title" id="sTitle"></div>
-      <div class="sheet-loc" id="sLoc"></div>
-      <div class="rate-box">
-        <div class="rate-label">وش تقييمك للصورة؟</div>
-        <div class="big-stars" id="bigStars"></div>
-        <div class="rate-avg" id="sAvg"></div>
-        <div class="thanks" id="thanks">✓ تم تسجيل تقييمك، يعطيك العافية</div>
-      </div>
-      <div class="poll-box">
-        <div class="poll-title">🗳️ وش تستاهل هالصورة؟ <span style="color:var(--txt-dim);font-size:11px;font-weight:400">(اختر أكثر من خيار)</span></div>
-        <div class="chips" id="pollChips"></div>
-      </div>
-      <div class="comments-h">💬 التعليقات <span id="cCount" style="color:var(--txt-dim);font-size:12px"></span></div>
-      <div id="cList"></div>
-      <div class="c-input">
-        <input id="cText" placeholder="اكتب تعليقك...">
-        <button class="btn" onclick="addComment()">أرسل</button>
-      </div>
-      <div style="text-align:center;margin-top:18px">
-        <button onclick="reportPhoto()" style="background:none;border:none;color:var(--txt-dim);font-family:'Tajawal';font-size:12px;cursor:pointer;text-decoration:underline">🚩 إبلاغ عن صورة مخالفة</button>
-      </div>
-    </div>
+<div id="panel">
+  <div class="tabs">
+    <div class="tab on" id="tRep" onclick="setTab('rep')">🚩 المبلغ عنها</div>
+    <div class="tab" id="tAll" onclick="setTab('all')">🗂️ كل الصور</div>
   </div>
+  <div id="list"><div class="empty">⏳ جاري التحميل...</div></div>
 </div>
-
-<!-- ====== دخول المشرف ====== -->
-<div class="overlay" id="admLogin" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="sheet" style="max-height:none;padding-bottom:20px">
-    <div class="sheet-body">
-      <div class="sheet-title">👮 دخول المشرف</div>
-      <div class="sheet-loc">هذه المنطقة لإدارة التطبيق فقط</div>
-      <input type="email" id="admEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
-      <input type="password" id="admPass" placeholder="كلمة السر" autocomplete="current-password" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
-      <button class="btn" style="width:100%;padding:13px" id="admInBtn" onclick="admLoginGo()">دخول</button>
-    </div>
-  </div>
-</div>
-
-<!-- ====== لوحة الإشراف ====== -->
-<div class="overlay" id="admPanel" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="sheet">
-    <button class="close-x" onclick="$('admPanel').classList.remove('show')">✕</button>
-    <div class="sheet-body">
-      <div class="sheet-title">⚙️ لوحة الإشراف</div>
-      <div class="sort-tabs" style="margin:12px 0">
-        <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
-        <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
-      </div>
-      <div id="admList"><div class="empty">⏳</div></div>
-      <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line)" onclick="admLogout()">🚪 خروج المشرف</button>
-    </div>
-  </div>
-</div>
-
-<nav>
-  <button class="nav-btn on" id="nb-feed" onclick="go('feed')"><span class="ic">🏞️</span>الصور</button>
-  <button class="nav-btn add-main" onclick="go('add')"><span class="ic">+</span></button>
-  <button class="nav-btn" id="nb-top" onclick="goTop()"><span class="ic">🏆</span>المتصدرة</button>
-</nav>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============ إعداد Supabase ============ */
 const SB_URL = "https://gquzjaxpqeggknhipmzk.supabase.co";
 const SB_KEY = "sb_publishable_BNp6Fg3VLXa1Pf4V6QjncQ_f496PquX";
 const sb = supabase.createClient(SB_URL, SB_KEY);
-let USER = null;
-
-async function ensureAuth(){
-  const { data:{ session } } = await sb.auth.getSession();
-  if (session) { USER = session.user; return; }
-  const { data, error } = await sb.auth.signInAnonymously();
-  if (error) { toast("تعذر الاتصال بالحساب — تأكد من تفعيل Anonymous Sign-ins", true); throw error; }
-  USER = data.user;
-}
-async function saveName(name){
-  if(!name || !USER) return;
-  await sb.from('profiles').update({ display_name: name }).eq('id', USER.id);
-}
-
-/* ============ المناطق والمدن ============ */
-const GEO = {
-  "منطقة الرياض":["الرياض","الدرعية","الخرج","المجمعة","الزلفي","شقراء","وادي الدواسر","الأفلاج"],
-  "منطقة مكة المكرمة":["مكة المكرمة","جدة","الطائف","القنفذة","الليث","رابغ"],
-  "منطقة المدينة المنورة":["المدينة المنورة","ينبع","العلا","بدر","خيبر"],
-  "منطقة القصيم":["بريدة","عنيزة","الرس","البكيرية","المذنب","رياض الخبراء"],
-  "المنطقة الشرقية":["الدمام","الخبر","الظهران","الأحساء","الجبيل","القطيف","حفر الباطن"],
-  "منطقة عسير":["أبها","خميس مشيط","بيشة","النماص","محايل عسير","رجال ألمع","تنومة"],
-  "منطقة تبوك":["تبوك","الوجه","ضباء","أملج","حقل","تيماء","نيوم"],
-  "منطقة حائل":["حائل","بقعاء","الغزالة","الشنان"],
-  "منطقة الحدود الشمالية":["عرعر","رفحاء","طريف"],
-  "منطقة جازان":["جازان","صبيا","أبو عريش","فيفاء","فرسان","الدرب"],
-  "منطقة نجران":["نجران","شرورة","حبونا"],
-  "منطقة الباحة":["الباحة","بلجرشي","المندق","قلوة"],
-  "منطقة الجوف":["سكاكا","دومة الجندل","القريات"]
-};
-const COORDS = {
-"الرياض":[24.71,46.68],"الدرعية":[24.74,46.57],"الخرج":[24.15,47.30],"المجمعة":[25.90,45.35],"الزلفي":[26.30,44.80],"شقراء":[25.24,45.25],"وادي الدواسر":[20.46,44.79],"الأفلاج":[22.28,46.73],
-"مكة المكرمة":[21.39,39.86],"جدة":[21.49,39.19],"الطائف":[21.27,40.42],"القنفذة":[19.13,41.08],"الليث":[20.15,40.27],"رابغ":[22.80,39.03],
-"المدينة المنورة":[24.47,39.61],"ينبع":[24.09,38.06],"العلا":[26.61,37.92],"بدر":[23.78,38.79],"خيبر":[25.70,39.29],
-"بريدة":[26.33,43.97],"عنيزة":[26.09,43.99],"الرس":[25.87,43.50],"البكيرية":[26.14,43.66],"المذنب":[25.86,44.22],"رياض الخبراء":[26.06,43.66],
-"الدمام":[26.43,50.10],"الخبر":[26.28,50.21],"الظهران":[26.29,50.15],"الأحساء":[25.38,49.59],"الجبيل":[27.01,49.66],"القطيف":[26.56,50.01],"حفر الباطن":[28.43,45.97],
-"أبها":[18.25,42.51],"خميس مشيط":[18.31,42.73],"بيشة":[19.98,42.60],"النماص":[19.15,42.13],"محايل عسير":[18.55,42.05],"رجال ألمع":[18.20,42.27],"تنومة":[18.93,42.13],
-"تبوك":[28.38,36.57],"الوجه":[26.25,36.45],"ضباء":[27.35,35.69],"أملج":[25.02,37.27],"حقل":[29.28,34.94],"تيماء":[27.63,38.55],"نيوم":[28.10,35.20],
-"حائل":[27.51,41.72],"بقعاء":[27.88,42.42],"الغزالة":[26.83,41.29],"الشنان":[27.17,42.43],
-"عرعر":[30.98,41.02],"رفحاء":[29.63,43.50],"طريف":[31.68,38.65],
-"جازان":[16.89,42.55],"صبيا":[17.15,42.63],"أبو عريش":[16.97,42.83],"فيفاء":[17.25,43.10],"فرسان":[16.70,42.12],"الدرب":[17.72,42.25],
-"نجران":[17.49,44.13],"شرورة":[17.47,47.11],"حبونا":[17.80,44.05],
-"الباحة":[20.01,41.47],"بلجرشي":[19.86,41.57],"المندق":[20.16,41.28],"قلوة":[19.77,41.38],
-"سكاكا":[29.97,40.20],"دومة الجندل":[29.81,39.87],"القريات":[31.33,37.34]
-};
-function nearestCity(lat,lng){
-  let best=null,bd=1e9;
-  for(const city in COORDS){
-    const[clat,clng]=COORDS[city];
-    const d=(lat-clat)**2+((lng-clng)*Math.cos(lat*Math.PI/180))**2;
-    if(d<bd){bd=d;best=city}
-  }
-  const km=Math.sqrt(bd)*111;
-  let region="";
-  for(const r in GEO)if(GEO[r].includes(best)){region=r;break}
-  return{city:best,region,km:Math.round(km)};
-}
-
-/* ============ EXIF GPS ============ */
-function readExifGPS(file){
-  return new Promise(resolve=>{
-    const r=new FileReader();
-    r.onload=e=>{
-      try{
-        const v=new DataView(e.target.result);
-        if(v.getUint16(0)!==0xFFD8)return resolve(null);
-        let off=2;
-        while(off<v.byteLength-4){
-          if(v.getUint16(off)===0xFFE1){
-            const tiff=off+10;
-            const little=v.getUint16(tiff)===0x4949;
-            const g16=o=>v.getUint16(o,little),g32=o=>v.getUint32(o,little);
-            const ifd0=tiff+g32(tiff+4);
-            let gpsIFD=0,n=g16(ifd0);
-            for(let i=0;i<n;i++){
-              const en=ifd0+2+i*12;
-              if(g16(en)===0x8825){gpsIFD=tiff+g32(en+8);break}
-            }
-            if(!gpsIFD)return resolve(null);
-            let latRef="N",lngRef="E",lat=null,lng=null;
-            const rat=o=>{const p=tiff+g32(o+8);return[g32(p)/g32(p+4),g32(p+8)/g32(p+12),g32(p+16)/g32(p+20)]};
-            const gn=g16(gpsIFD);
-            for(let i=0;i<gn;i++){
-              const en=gpsIFD+2+i*12,tag=g16(en);
-              if(tag===1)latRef=String.fromCharCode(v.getUint8(en+8));
-              if(tag===3)lngRef=String.fromCharCode(v.getUint8(en+8));
-              if(tag===2)lat=rat(en);
-              if(tag===4)lng=rat(en);
-            }
-            if(!lat||!lng)return resolve(null);
-            const toD=(a,ref)=>(a[0]+a[1]/60+a[2]/3600)*(ref==="S"||ref==="W"?-1:1);
-            return resolve({lat:toD(lat,latRef),lng:toD(lng,lngRef)});
-          }
-          off+=2+v.getUint16(off+2);
-        }
-        resolve(null);
-      }catch(err){resolve(null)}
-    };
-    r.readAsArrayBuffer(file.slice(0,256*1024));
-  });
-}
-function liveLocation(){
-  return new Promise(resolve=>{
-    if(!navigator.geolocation)return resolve(null);
-    navigator.geolocation.getCurrentPosition(
-      p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)}),
-      ()=>resolve(null),
-      {enableHighAccuracy:true,timeout:8000,maximumAge:30000}
-    );
-  });
-}
-
-/* ============ الأوسمة ============ */
-const BADGES = [
-  {k:'wall',  label:'📱 خلفية شاشة'},
-  {k:'mine',  label:'❤️ بحطها خلفية جوالي'},
-  {k:'global',label:'🌍 تدخل مسابقات عالمية'},
-  {k:'face',  label:'🇸🇦 واجهة تشرّف السعودية'},
-  {k:'print', label:'🖼️ تستاهل تنطبع لوحة'}
-];
-function topBadge(p){
-  const b=p.badge_counts||{};let best=null,bv=0;
-  for(const bd of BADGES)if((b[bd.k]||0)>bv){bv=b[bd.k];best=bd}
-  return bv>=2?best:null;
-}
-
-/* ============ الحالة ============ */
-let photos=[], sortMode='top', curId=null, curPhoto=null;
-let myRating=0, myBadgeSet=new Set();
 const $=id=>document.getElementById(id);
-const starsTxt=v=>{let f=Math.round(v);return "★".repeat(f)+"☆".repeat(5-f)};
-function toast(m,err){const t=$('toast');t.textContent=m;t.className='toast'+(err?' err':'');t.style.display='block';setTimeout(()=>t.style.display='none',2600)}
-function imgUrl(path){return sb.storage.from('photos').getPublicUrl(path).data.publicUrl}
+let tab='rep', photos=[], repCounts={};
+function toast(m,err){const t=$('toast');t.textContent=m;t.className='toast'+(err?' err':'');t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+function imgUrl(p){return sb.storage.from('photos').getPublicUrl(p).data.publicUrl}
 
-/* ============ تحميل الصور ============ */
-async function loadPhotos(){
-  const { data, error } = await sb.from('photos_ranked').select('*');
-  if(error){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${error.message}</div>`;return}
-  photos = data || [];
-  render();
-}
-
-/* ============ الفلاتر والعرض ============ */
-function initSelects(){
-  const fr=$('fRegion'),ar=$('aRegion');
-  ar.innerHTML='<option value="">اختر المنطقة</option>';
-  for(const r in GEO){fr.innerHTML+=`<option>${r}</option>`;ar.innerHTML+=`<option>${r}</option>`;}
-}
-function fillCities(){
-  const r=$('fRegion').value,c=$('fCity');
-  c.innerHTML='<option value="">كل المدن</option>';
-  if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
-}
-function fillAddCities(){
-  const r=$('aRegion').value,c=$('aCity');
-  c.innerHTML='<option value="">اختر المدينة</option>';
-  if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
-}
-function setSort(m){sortMode=m;$('tabTop').classList.toggle('on',m==='top');$('tabNew').classList.toggle('on',m==='new');render()}
-
-function render(){
-  const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
-  let list=photos.filter(p=>
-    (!r||p.region===r)&&(!c||p.city===c)&&
-    (!q||p.title.includes(q)||(p.village||'').includes(q)||p.city.includes(q)||p.region.includes(q))
-  );
-  list.sort((a,b)=>sortMode==='top'
-    ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
-    :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة`;
-  const feed=$('feed');
-  if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
-  feed.innerHTML=list.map((p,i)=>{
-    const medal=sortMode==='top'&&i<3&&p.ratings_count>0?['🥇','🥈','🥉'][i]+' ':'';
-    const tb=topBadge(p);
-    return `<div class="card" onclick="openSheet(${p.id})">
-      <div class="ph"><img src="${imgUrl(p.image_path)}" loading="lazy" alt="${p.title}">
-        <div class="medal">${medal}${Number(p.avg_stars).toFixed(1)} ★</div>
-        ${tb?`<div class="badge-tag">${tb.label}</div>`:''}
-        <div class="loc-chip">📍 ${p.village||p.city}</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">${p.title}</div>
-        <div class="card-meta">
-          <span>📷 ${p.photographer} · ${p.region.replace('منطقة ','').replace('المنطقة ','')}</span>
-          <span class="stars-mini">${starsTxt(p.avg_stars)} <span style="color:var(--txt-dim)">(${p.ratings_count})</span></span>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ============ نافذة الصورة ============ */
-async function openSheet(id){
-  curId=id;curPhoto=photos.find(x=>x.id===id);
-  const p=curPhoto;
-  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${p.title}">`;
-  $('sTitle').textContent=p.title;
-  $('sLoc').innerHTML=`📍 ${p.region} · ${p.city}${p.village?' · '+p.village:''} — عدسة ${p.photographer}`
-    +(p.lat?`<br><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="color:var(--palm);text-decoration:none">🗺️ الموقع الدقيق على الخريطة</a>`:'');
-  $('overlay').classList.add('show');
-  document.body.style.overflow='hidden';
-  // تقييمي وأوسمتي وتعليقات — من القاعدة
-  myRating=0;myBadgeSet=new Set();
-  drawStars();renderPoll();
-  $('cList').innerHTML='<div class="loader" style="padding:10px">⏳</div>';
-  const [rt,bd,cm]=await Promise.all([
-    sb.from('ratings').select('stars').eq('photo_id',id).eq('user_id',USER.id).maybeSingle(),
-    sb.from('badge_votes').select('badge_key').eq('photo_id',id).eq('user_id',USER.id),
-    sb.from('comments').select('body,created_at,profiles(display_name)').eq('photo_id',id).order('created_at')
-  ]);
-  myRating=rt.data?rt.data.stars:0;
-  (bd.data||[]).forEach(x=>myBadgeSet.add(x.badge_key));
-  curPhoto._comments=(cm.data||[]);
-  $('thanks').style.display=myRating?'block':'none';
-  drawStars();renderPoll();renderComments();
-}
-function closeSheet(){$('overlay').classList.remove('show');document.body.style.overflow=''}
-
-function drawStars(){
-  $('bigStars').innerHTML=[1,2,3,4,5].map(n=>
-    `<button class="${n<=myRating?'lit':''}" onclick="rate(${n})">★</button>`).join('');
-  $('sAvg').textContent=`المتوسط ${Number(curPhoto.avg_stars).toFixed(1)} من 5 · ${curPhoto.ratings_count} تقييم`;
-}
-async function rate(n){
-  const prev=myRating;myRating=n;drawStars();
-  const { error } = await sb.from('ratings').upsert({photo_id:curId,user_id:USER.id,stars:n});
-  if(error){myRating=prev;drawStars();toast('تعذر حفظ التقييم',true);return}
-  $('thanks').style.display='block';
-  await refreshOne();
-}
-
-function renderPoll(){
-  const b=curPhoto.badge_counts||{};
-  $('pollChips').innerHTML=BADGES.map(bd=>
-    `<div class="chip ${myBadgeSet.has(bd.k)?'on':''}" onclick="voteBadge('${bd.k}')">${bd.label}<span class="n">${b[bd.k]||0}</span></div>`
-  ).join('');
-}
-async function voteBadge(k){
-  if(myBadgeSet.has(k)){
-    myBadgeSet.delete(k);renderPoll();
-    await sb.from('badge_votes').delete().eq('photo_id',curId).eq('user_id',USER.id).eq('badge_key',k);
-  }else{
-    myBadgeSet.add(k);renderPoll();
-    const { error } = await sb.from('badge_votes').insert({photo_id:curId,user_id:USER.id,badge_key:k});
-    if(error){myBadgeSet.delete(k);renderPoll();toast('تعذر التصويت',true);return}
-  }
-  await refreshOne();
-}
-
-function renderComments(){
-  const list=curPhoto._comments||[];
-  $('cCount').textContent=`(${list.length})`;
-  $('cList').innerHTML=list.length
-    ?list.map(c=>`<div class="comment"><b>${c.profiles?.display_name||'زائر'}</b>${c.body}</div>`).join('')
-    :`<div style="color:var(--txt-dim);font-size:13px;padding:6px 2px">كن أول من يعلق ✍️</div>`;
-}
-async function reportPhoto(){
-  if(!confirm('هل أنت متأكد أن هذه الصورة مخالفة؟ البلاغات الكيدية قد تعرّض حسابك للحظر.'))return;
-  const { error } = await sb.from('reports').insert({photo_id:curId,user_id:USER.id});
-  if(error){
-    if(error.code==='23505')toast('سبق أن أبلغت عن هذه الصورة');
-    else toast('تعذر إرسال البلاغ',true);
-    return;
-  }
-  toast('وصل بلاغك، شكراً لحرصك 🙏');
-}
-
-async function addComment(){
-  const t=$('cText').value.trim();if(!t)return;
-  const name=$('aName').value.trim();
-  if(name)await saveName(name);
-  const { error } = await sb.from('comments').insert({photo_id:curId,user_id:USER.id,body:t});
-  if(error){toast('تعذر إرسال التعليق',true);return}
-  $('cText').value='';
-  const cm=await sb.from('comments').select('body,created_at,profiles(display_name)').eq('photo_id',curId).order('created_at');
-  curPhoto._comments=cm.data||[];renderComments();
-}
-
-/* تحديث بيانات صورة واحدة من العرض المجمّع */
-async function refreshOne(){
-  const { data } = await sb.from('photos_ranked').select('*').eq('id',curId).single();
-  if(data){
-    const i=photos.findIndex(x=>x.id===curId);
-    if(i>-1)photos[i]={...data,_comments:curPhoto._comments};
-    curPhoto=photos[i];
-    drawStars();renderPoll();render();
-  }
-}
-
-/* ============ الإضافة ============ */
-let pendingFile=null,pendingGeo=null,pendingBlob=null;
-function applyGeo(pos,source){
-  const card=$('geoCard');card.style.display='block';
-  if(!pos){
-    card.classList.add('warn');
-    $('geoStatus').textContent=source==='live'
-      ?'⚠️ ما قدرنا نوصل لموقعك — تأكد أن الموقع مفعّل'
-      :'⚠️ الصورة ما تحتوي معلومات موقع — حدد الموقع يدوياً';
-    $('geoCoords').textContent='';
-    return;
-  }
-  card.classList.remove('warn');
-  const n=nearestCity(pos.lat,pos.lng);
-  pendingGeo={lat:pos.lat,lng:pos.lng};
-  $('aRegion').value=n.region;fillAddCities();$('aCity').value=n.city;
-  $('geoStatus').textContent=`📡 تم تحديد الموقع تلقائياً: قرب ${n.city} (≈${n.km} كم)`+(pos.acc?` · دقة ±${pos.acc}م`:'');
-  $('geoCoords').textContent=`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`;
-}
-async function pickImg(inp,isLive){
-  const f=inp.files[0];if(!f)return;
-  pendingGeo=null;pendingFile=f;pendingBlob=null;
-  // معاينة فورية خفيفة (بدون قراءة الملف كاملاً)
-  $('drop').style.display='block';
-  $('preview').src=URL.createObjectURL(f);$('preview').style.display='block';
-  $('dropTxt').textContent='✓ تم اختيار الصورة';
-  $('drop').classList.add('has');
-  // ضغط بالخلفية من الحين — عشان النشر يكون لحظي
-  compress(f).then(b=>{pendingBlob=b});
-  $('geoCard').style.display='block';$('geoCard').classList.remove('warn');
-  $('geoStatus').textContent='⏳ جاري تحديد الموقع...';$('geoCoords').textContent='';
-  if(isLive){
-    let pos=await liveLocation();
-    if(!pos)pos=await readExifGPS(f);
-    applyGeo(pos,'live');
-  }else{
-    let pos=await readExifGPS(f);
-    applyGeo(pos,pos?'exif':'exif');
-  }
-  inp.value='';
-}
-
-/* ضغط الصورة قبل الرفع (أقصى عرض 1600px) */
-function compress(file){
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
-      const cv=document.createElement('canvas');
-      cv.width=Math.round(img.width*scale);cv.height=Math.round(img.height*scale);
-      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-      cv.toBlob(b=>resolve(b||file),'image/jpeg',0.8);
-    };
-    img.onerror=()=>resolve(file);
-    img.src=URL.createObjectURL(file);
-  });
-}
-
-async function addPhoto(){
-  const title=$('aTitle').value.trim(),region=$('aRegion').value,city=$('aCity').value;
-  if(!pendingFile)return toast('اختر صورة أول ⚠️',true);
-  if(!title)return toast('اكتب عنوان للصورة ⚠️',true);
-  if(!region||!city)return toast('حدد المنطقة والمدينة ⚠️',true);
-  const btn=$('pubBtn');btn.disabled=true;btn.textContent='⏳ جاري الرفع...';
-  try{
-    const name=$('aName').value.trim();
-    if(name)await saveName(name);
-    const blob=pendingBlob||await compress(pendingFile);
-    const path=`${USER.id}/${Date.now()}.jpg`;
-    const up=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});
-    if(up.error)throw up.error;
-    const ins=await sb.from('photos').insert({
-      user_id:USER.id,title,region,city,
-      village:$('aVillage').value.trim(),
-      lat:pendingGeo?.lat??null,lng:pendingGeo?.lng??null,
-      image_path:path
-    });
-    if(ins.error)throw ins.error;
-    pendingFile=null;pendingGeo=null;pendingBlob=null;
-    $('preview').style.display='none';$('drop').style.display='none';$('geoCard').style.display='none';
-    $('aTitle').value='';$('aVillage').value='';
-    toast('نُشرت صورتك 🎉');
-    await loadPhotos();go('feed');setSort('new');
-  }catch(e){
-    toast('تعذر النشر: '+(e.message||''),true);
-  }finally{
-    btn.disabled=false;btn.textContent='انشر الصورة 🚀';
-  }
-}
-
-/* ============ وضع المشرف ============ */
-let IS_ADMIN=false,tapCount=0,tapTimer=null,admTab='rep';
-let admPhotos=[],admReps={};
-
-function logoTap(){
-  tapCount++;clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>tapCount=0,1600);
-  if(tapCount>=5){
-    tapCount=0;
-    if(IS_ADMIN)openAdmin();
-    else $('admLogin').classList.add('show');
-  }
-}
-async function checkAdmin(){
-  if(!USER||USER.is_anonymous){IS_ADMIN=false;return false}
-  const { data } = await sb.from('admins').select('id').maybeSingle();
-  IS_ADMIN=!!data;
-  $('admGear').style.display=IS_ADMIN?'block':'none';
-  return IS_ADMIN;
-}
-async function admLoginGo(){
-  const b=$('admInBtn');b.disabled=true;b.textContent='⏳';
-  const { error } = await sb.auth.signInWithPassword({
-    email:$('admEmail').value.trim(),password:$('admPass').value
-  });
+async function login(){
+  const b=$('inBtn');b.disabled=true;b.textContent='⏳';
+  const { data, error } = await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('pass').value});
   b.disabled=false;b.textContent='دخول';
   if(error){toast('بيانات الدخول غير صحيحة',true);return}
-  const { data:{ session } } = await sb.auth.getSession();
-  USER=session.user;
-  if(await checkAdmin()){
-    $('admLogin').classList.remove('show');
-    toast('أهلاً بالمشرف 👮');
-    openAdmin();
-  }else{
-    toast('هذا الحساب ليس مشرفاً',true);
-    await sb.auth.signOut();location.reload();
-  }
+  await afterLogin();
 }
-async function admLogout(){await sb.auth.signOut();location.reload()}
+async function afterLogin(){
+  // التحقق أن الحساب مشرف فعلاً
+  const { data } = await sb.from('admins').select('id').maybeSingle();
+  if(!data){toast('هذا الحساب ليس مشرفاً',true);await sb.auth.signOut();return}
+  $('loginBox').style.display='none';$('panel').style.display='block';$('outBtn').style.display='block';
+  await load();
+}
+async function logout(){await sb.auth.signOut();location.reload()}
 
-async function openAdmin(){
-  $('admPanel').classList.add('show');
-  $('admList').innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
+async function load(){
   const [ph,rp]=await Promise.all([
     sb.from('photos').select('*, profiles(display_name, banned)').order('created_at',{ascending:false}),
     sb.from('reports').select('photo_id')
   ]);
-  admPhotos=ph.data||[];
-  admReps={};
-  (rp.data||[]).forEach(r=>admReps[r.photo_id]=(admReps[r.photo_id]||0)+1);
-  admRender();
+  photos=ph.data||[];
+  repCounts={};
+  (rp.data||[]).forEach(r=>repCounts[r.photo_id]=(repCounts[r.photo_id]||0)+1);
+  render();
 }
-function admSetTab(t){admTab=t;$('admTabRep').classList.toggle('on',t==='rep');$('admTabAll').classList.toggle('on',t==='all');admRender()}
-function admRender(){
-  let list=admTab==='rep'?admPhotos.filter(p=>(admReps[p.id]||0)>0||p.hidden):admPhotos;
-  if(!list.length){$('admList').innerHTML=`<div class="empty">${admTab==='rep'?'✅ ما فيه بلاغات — الساحة نظيفة':'ما فيه صور'}</div>`;return}
-  $('admList').innerHTML=list.map(p=>{
-    const rc=admReps[p.id]||0;
-    return `<div class="card" style="margin-bottom:12px;cursor:default">
-      <div class="ph" style="height:150px"><img src="${imgUrl(p.image_path)}" loading="lazy"></div>
-      <div class="card-body">
-        <div class="card-title">${p.title}</div>
-        <div class="card-meta" style="margin-bottom:8px"><span>📷 ${p.profiles?.display_name||'?'} · 📍 ${p.city}</span></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-          ${rc?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(242,179,61,.15);color:var(--star);border:1px solid var(--star)">🚩 ${rc} بلاغ</span>`:''}
-          ${p.hidden?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.15);color:var(--sadu);border:1px solid var(--sadu)">مخفية</span>`:''}
-          ${p.profiles?.banned?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.3);color:#fff;border:1px solid var(--sadu)">صاحبها محظور</span>`:''}
+function setTab(t){tab=t;$('tRep').classList.toggle('on',t==='rep');$('tAll').classList.toggle('on',t==='all');render()}
+
+function render(){
+  let list=tab==='rep'?photos.filter(p=>(repCounts[p.id]||0)>0||p.hidden):photos;
+  if(!list.length){$('list').innerHTML=`<div class="empty">${tab==='rep'?'✅ ما فيه بلاغات — الساحة نظيفة':'ما فيه صور بعد'}</div>`;return}
+  $('list').innerHTML=list.map(p=>{
+    const rc=repCounts[p.id]||0;
+    return `<div class="pcard">
+      <img src="${imgUrl(p.image_path)}" loading="lazy">
+      <div class="pbody">
+        <div class="ptitle">${p.title}</div>
+        <div class="pmeta">📷 ${p.profiles?.display_name||'?'} · 📍 ${p.city}${p.village?' · '+p.village:''} · ${new Date(p.created_at).toLocaleDateString('ar-SA')}</div>
+        <div class="flags">
+          ${rc?`<span class="flag rep">🚩 ${rc} بلاغ</span>`:''}
+          ${p.hidden?`<span class="flag hid">مخفية</span>`:''}
+          ${p.profiles?.banned?`<span class="flag ban">صاحبها محظور</span>`:''}
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn" style="font-size:12px;padding:8px 12px;${p.hidden?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
-          <button class="btn" style="font-size:12px;padding:8px 12px" onclick="admDel(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
-          <button class="btn" style="font-size:12px;padding:8px 12px;${p.profiles?.banned?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
-          ${rc?`<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line)" onclick="admClear(${p.id})">مسح البلاغات</button>`:''}
+        <div class="acts">
+          <button class="btn ${p.hidden?'grn':'gry'}" onclick="toggleHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
+          <button class="btn" onclick="delPhoto(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
+          <button class="btn ${p.profiles?.banned?'grn':'gry'}" onclick="toggleBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
+          ${rc?`<button class="btn gry" onclick="clearReports(${p.id})">مسح البلاغات</button>`:''}
         </div>
       </div>
     </div>`;
   }).join('');
 }
-async function admHide(id,hide){
+
+async function toggleHide(id,hide){
   const { error } = await sb.from('photos').update({hidden:hide}).eq('id',id);
   if(error){toast('فشلت العملية',true);return}
-  toast(hide?'أُخفيت الصورة':'أُظهرت الصورة');
-  await openAdmin();await loadPhotos();
+  toast(hide?'أُخفيت الصورة':'أُظهرت الصورة');await load();
 }
-async function admDel(id,path){
+async function delPhoto(id,path){
   if(!confirm('حذف نهائي؟ لا يمكن التراجع.'))return;
   const { error } = await sb.from('photos').delete().eq('id',id);
   if(error){toast('فشل الحذف',true);return}
   await sb.storage.from('photos').remove([path]);
-  toast('حُذفت الصورة نهائياً');
-  await openAdmin();await loadPhotos();
+  toast('حُذفت الصورة نهائياً');await load();
 }
-async function admBan(uid,ban){
+async function toggleBan(uid,ban){
   if(ban&&!confirm('حظر المصور؟ لن يستطيع النشر أو التعليق.'))return;
   const { error } = await sb.from('profiles').update({banned:ban}).eq('id',uid);
   if(error){toast('فشلت العملية',true);return}
-  toast(ban?'تم حظر المصور ⛔':'فُك الحظر');
-  await openAdmin();
+  toast(ban?'تم حظر المصور ⛔':'فُك الحظر');await load();
 }
-async function admClear(id){
+async function clearReports(id){
   const { error } = await sb.from('reports').delete().eq('photo_id',id);
   if(error){toast('فشلت العملية',true);return}
-  toast('مُسحت البلاغات');
-  await openAdmin();
+  toast('مُسحت البلاغات');await load();
 }
 
-/* ============ التنقل ============ */
-function go(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
-  $('page-'+p).classList.add('on');
-  $('nb-feed').classList.toggle('on',p==='feed');
-  window.scrollTo(0,0);
-}
-function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$('q').value='';render()}
-
-/* ============ البداية ============ */
+// جلسة سابقة؟
 (async()=>{
-  initSelects();fillAddCities();
-  try{await ensureAuth();await checkAdmin();await loadPhotos();}
-  catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر الاتصال بالقاعدة<br>${e.message||''}</div>`}
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session && !session.user.is_anonymous) await afterLogin();
 })();
 </script>
 </body>
