@@ -115,8 +115,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 
 <div class="sadu"></div>
 <header>
-  <div class="logo">صورة من بلدي<span>عدسات أهل الديار</span></div>
-  <div class="count-pill" id="totalPill">...</div>
+  <div class="logo" onclick="logoTap()">صورة من بلدي<span>عدسات أهل الديار</span></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button id="admGear" style="display:none;background:var(--card);border:1px solid var(--sadu);border-radius:50%;width:36px;height:36px;font-size:17px;cursor:pointer;color:var(--sand)" onclick="openAdmin()">⚙️</button>
+    <div class="count-pill" id="totalPill">...</div>
+  </div>
 </header>
 
 <div class="page on" id="page-feed">
@@ -187,6 +190,35 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
       <div style="text-align:center;margin-top:18px">
         <button onclick="reportPhoto()" style="background:none;border:none;color:var(--txt-dim);font-family:'Tajawal';font-size:12px;cursor:pointer;text-decoration:underline">🚩 إبلاغ عن صورة مخالفة</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== دخول المشرف ====== -->
+<div class="overlay" id="admLogin" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="sheet" style="max-height:none;padding-bottom:20px">
+    <div class="sheet-body">
+      <div class="sheet-title">👮 دخول المشرف</div>
+      <div class="sheet-loc">هذه المنطقة لإدارة التطبيق فقط</div>
+      <input type="email" id="admEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
+      <input type="password" id="admPass" placeholder="كلمة السر" autocomplete="current-password" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
+      <button class="btn" style="width:100%;padding:13px" id="admInBtn" onclick="admLoginGo()">دخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== لوحة الإشراف ====== -->
+<div class="overlay" id="admPanel" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="sheet">
+    <button class="close-x" onclick="$('admPanel').classList.remove('show')">✕</button>
+    <div class="sheet-body">
+      <div class="sheet-title">⚙️ لوحة الإشراف</div>
+      <div class="sort-tabs" style="margin:12px 0">
+        <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
+        <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
+      </div>
+      <div id="admList"><div class="empty">⏳</div></div>
+      <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line)" onclick="admLogout()">🚪 خروج المشرف</button>
     </div>
   </div>
 </div>
@@ -584,6 +616,112 @@ async function addPhoto(){
   }
 }
 
+/* ============ وضع المشرف ============ */
+let IS_ADMIN=false,tapCount=0,tapTimer=null,admTab='rep';
+let admPhotos=[],admReps={};
+
+function logoTap(){
+  tapCount++;clearTimeout(tapTimer);
+  tapTimer=setTimeout(()=>tapCount=0,1600);
+  if(tapCount>=5){
+    tapCount=0;
+    if(IS_ADMIN)openAdmin();
+    else $('admLogin').classList.add('show');
+  }
+}
+async function checkAdmin(){
+  if(!USER||USER.is_anonymous){IS_ADMIN=false;return false}
+  const { data } = await sb.from('admins').select('id').maybeSingle();
+  IS_ADMIN=!!data;
+  $('admGear').style.display=IS_ADMIN?'block':'none';
+  return IS_ADMIN;
+}
+async function admLoginGo(){
+  const b=$('admInBtn');b.disabled=true;b.textContent='⏳';
+  const { error } = await sb.auth.signInWithPassword({
+    email:$('admEmail').value.trim(),password:$('admPass').value
+  });
+  b.disabled=false;b.textContent='دخول';
+  if(error){toast('بيانات الدخول غير صحيحة',true);return}
+  const { data:{ session } } = await sb.auth.getSession();
+  USER=session.user;
+  if(await checkAdmin()){
+    $('admLogin').classList.remove('show');
+    toast('أهلاً بالمشرف 👮');
+    openAdmin();
+  }else{
+    toast('هذا الحساب ليس مشرفاً',true);
+    await sb.auth.signOut();location.reload();
+  }
+}
+async function admLogout(){await sb.auth.signOut();location.reload()}
+
+async function openAdmin(){
+  $('admPanel').classList.add('show');
+  $('admList').innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
+  const [ph,rp]=await Promise.all([
+    sb.from('photos').select('*, profiles(display_name, banned)').order('created_at',{ascending:false}),
+    sb.from('reports').select('photo_id')
+  ]);
+  admPhotos=ph.data||[];
+  admReps={};
+  (rp.data||[]).forEach(r=>admReps[r.photo_id]=(admReps[r.photo_id]||0)+1);
+  admRender();
+}
+function admSetTab(t){admTab=t;$('admTabRep').classList.toggle('on',t==='rep');$('admTabAll').classList.toggle('on',t==='all');admRender()}
+function admRender(){
+  let list=admTab==='rep'?admPhotos.filter(p=>(admReps[p.id]||0)>0||p.hidden):admPhotos;
+  if(!list.length){$('admList').innerHTML=`<div class="empty">${admTab==='rep'?'✅ ما فيه بلاغات — الساحة نظيفة':'ما فيه صور'}</div>`;return}
+  $('admList').innerHTML=list.map(p=>{
+    const rc=admReps[p.id]||0;
+    return `<div class="card" style="margin-bottom:12px;cursor:default">
+      <div class="ph" style="height:150px"><img src="${imgUrl(p.image_path)}" loading="lazy"></div>
+      <div class="card-body">
+        <div class="card-title">${p.title}</div>
+        <div class="card-meta" style="margin-bottom:8px"><span>📷 ${p.profiles?.display_name||'?'} · 📍 ${p.city}</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          ${rc?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(242,179,61,.15);color:var(--star);border:1px solid var(--star)">🚩 ${rc} بلاغ</span>`:''}
+          ${p.hidden?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.15);color:var(--sadu);border:1px solid var(--sadu)">مخفية</span>`:''}
+          ${p.profiles?.banned?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.3);color:#fff;border:1px solid var(--sadu)">صاحبها محظور</span>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" style="font-size:12px;padding:8px 12px;${p.hidden?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px" onclick="admDel(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px;${p.profiles?.banned?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
+          ${rc?`<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line)" onclick="admClear(${p.id})">مسح البلاغات</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function admHide(id,hide){
+  const { error } = await sb.from('photos').update({hidden:hide}).eq('id',id);
+  if(error){toast('فشلت العملية',true);return}
+  toast(hide?'أُخفيت الصورة':'أُظهرت الصورة');
+  await openAdmin();await loadPhotos();
+}
+async function admDel(id,path){
+  if(!confirm('حذف نهائي؟ لا يمكن التراجع.'))return;
+  const { error } = await sb.from('photos').delete().eq('id',id);
+  if(error){toast('فشل الحذف',true);return}
+  await sb.storage.from('photos').remove([path]);
+  toast('حُذفت الصورة نهائياً');
+  await openAdmin();await loadPhotos();
+}
+async function admBan(uid,ban){
+  if(ban&&!confirm('حظر المصور؟ لن يستطيع النشر أو التعليق.'))return;
+  const { error } = await sb.from('profiles').update({banned:ban}).eq('id',uid);
+  if(error){toast('فشلت العملية',true);return}
+  toast(ban?'تم حظر المصور ⛔':'فُك الحظر');
+  await openAdmin();
+}
+async function admClear(id){
+  const { error } = await sb.from('reports').delete().eq('photo_id',id);
+  if(error){toast('فشلت العملية',true);return}
+  toast('مُسحت البلاغات');
+  await openAdmin();
+}
+
 /* ============ التنقل ============ */
 function go(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
@@ -596,7 +734,7 @@ function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$(
 /* ============ البداية ============ */
 (async()=>{
   initSelects();fillAddCities();
-  try{await ensureAuth();await loadPhotos();}
+  try{await ensureAuth();await checkAdmin();await loadPhotos();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر الاتصال بالقاعدة<br>${e.message||''}</div>`}
 })();
 </script>
