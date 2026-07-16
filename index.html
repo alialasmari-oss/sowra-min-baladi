@@ -28,7 +28,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);max-width:520px;margin:0 auto;padding-bottom:150px;min-height:100vh}
+body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);max-width:520px;margin:0 auto;padding-bottom:190px;min-height:100vh}
 .sadu{height:10px;background:repeating-linear-gradient(45deg,var(--sadu) 0 8px,var(--night) 8px 16px,var(--sand) 16px 24px,var(--night) 24px 32px)}
 header{padding:18px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:linear-gradient(var(--night) 78%,transparent)}
 .logo{font-family:'Reem Kufi',sans-serif;font-size:26px;font-weight:700;color:var(--sand);line-height:1}
@@ -434,7 +434,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة`;
+  $('totalPill').textContent=`${photos.length} صورة · ن8`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
