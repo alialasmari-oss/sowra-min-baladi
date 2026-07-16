@@ -81,7 +81,7 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .stars-mini{color:var(--star);letter-spacing:.5px;font-size:11px;white-space:nowrap}
 .overlay{position:fixed;inset:0;background:rgba(36,31,28,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
 .overlay.show{display:flex}
-.sheet{background:var(--night);width:100%;max-width:760px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
+.sheet{position:relative;background:var(--night);width:100%;max-width:760px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
 @keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet .ph{height:45vh;min-height:240px;max-height:430px;border-radius:0;background:#000}
@@ -202,7 +202,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
+<div class="overlay" id="overlay">
   <div class="sheet">
     <button class="close-x" onclick="closeSheet()">✕</button>
     <div class="ph" id="sPh"></div>
@@ -266,7 +266,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 </div>
 
 <!-- ====== لوحة الإشراف ====== -->
-<div class="overlay" id="admPanel" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="overlay" id="admPanel">
   <div class="sheet">
     <button class="close-x" onclick="$('admPanel').classList.remove('show')">✕</button>
     <div class="sheet-body">
@@ -279,7 +279,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
       <div id="admPlaces" style="display:none">
         <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
           <div style="font-weight:700;font-size:14px;margin-bottom:10px">إضافة مكان جديد</div>
-          <select id="plcRegion" style="width:100%;margin-bottom:8px"></select>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <select id="plcRegion" style="flex:1" onchange="plcFillCities()"></select>
+            <select id="plcCity" style="flex:1"></select>
+          </div>
           <div style="display:flex;gap:8px;margin-bottom:8px">
             <input id="plcName" placeholder="اسم المكان" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none">
             <select id="plcKind" style="flex:0 0 110px">
@@ -313,6 +316,16 @@ const SB_URL = "https://gquzjaxpqeggknhipmzk.supabase.co";
 const SB_KEY = "sb_publishable_BNp6Fg3VLXa1Pf4V6QjncQ_f496PquX";
 const sb = supabase.createClient(SB_URL, SB_KEY);
 let USER = null;
+
+/* مراقب الأخطاء — يعرض أي خطأ تشغيلي على الشاشة */
+window.addEventListener('error', e=>{
+  const t=document.getElementById('toast');
+  if(t){t.textContent='⚠️ خطأ: '+(e.message||'غير معروف');t.className='toast err';t.style.display='block';setTimeout(()=>t.style.display='none',6000)}
+});
+window.addEventListener('unhandledrejection', e=>{
+  const t=document.getElementById('toast');
+  if(t){t.textContent='⚠️ خطأ: '+(e.reason?.message||e.reason||'غير معروف');t.className='toast err';t.style.display='block';setTimeout(()=>t.style.display='none',6000)}
+});
 
 async function ensureAuth(){
   const { data:{ session } } = await sb.auth.getSession();
@@ -505,7 +518,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن14`;
+  $('totalPill').textContent=`${photos.length} صورة · ن16`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -815,30 +828,35 @@ function admSetTab(t){
   if(t==='plc')renderPlaces();else admRender();
 }
 const KIND_AR={city:'مدينة',village:'قرية',landmark:'معلم'};
+function plcFillCities(){
+  const r=$('plcRegion').value,c=$('plcCity');
+  c.innerHTML='<option value="">المدينة (اختياري)</option>';
+  if(r&&GEO[r])GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
+}
 function renderPlaces(){
-  const reg=$('plcRegion');
-  if(!reg.options.length){
-    reg.innerHTML='<option value="">اختر المنطقة</option>';
-    for(const r in BASE_GEO)reg.innerHTML+=`<option>${r}</option>`;
-  }
+  const reg=$('plcRegion'),sel=reg.value;
+  reg.innerHTML='<option value="">اختر المنطقة</option>';
+  for(const r in BASE_GEO)reg.innerHTML+=`<option>${r}</option>`;
+  if(sel)reg.value=sel;
+  plcFillCities();
   $('plcList').innerHTML=customPlaces.length
     ?customPlaces.map(c=>`
       <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
         <div style="flex:1">
           <b style="font-size:14px">${c.name}</b>
-          <div style="font-size:11px;color:var(--txt-dim)">${KIND_AR[c.kind]} · ${c.region}</div>
+          <div style="font-size:11px;color:var(--txt-dim)">${KIND_AR[c.kind]}${c.city?' · '+c.city:''} · ${c.region}</div>
         </div>
         <button class="btn" style="font-size:12px;padding:7px 12px" onclick="admDelPlace(${c.id},'${c.name}')">🗑️ حذف</button>
       </div>`).join('')
     :`<div class="empty">ما فيه أماكن مضافة بعد — كل اللي تضيفه هنا يظهر فوراً بقوائم التطبيق</div>`;
 }
 async function admAddPlace(){
-  const region=$('plcRegion').value,name=$('plcName').value.trim(),kind=$('plcKind').value;
+  const region=$('plcRegion').value,city=$('plcCity').value,name=$('plcName').value.trim(),kind=$('plcKind').value;
   if(!region)return toast('اختر المنطقة',true);
   if(name.length<2)return toast('اكتب اسم المكان',true);
-  const { error } = await sb.from('custom_places').insert({region,name,kind});
+  const { error } = await sb.from('custom_places').insert({region,city,name,kind});
   if(error){
-    toast(error.code==='23505'?'المكان مضاف من قبل':'تعذرت الإضافة',true);
+    toast(error.code==='23505'?'المكان مضاف من قبل':'تعذرت الإضافة: '+error.message,true);
     return;
   }
   $('plcName').value='';
