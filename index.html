@@ -17,7 +17,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <style>
 :root{
   --night:#F7F1E3;   /* خلفية كريمية — قماش القطّ */
@@ -312,6 +312,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 
 <script>
 /* ============ إعداد Supabase ============ */
+/* حارس الإقلاع — رسالة واضحة بدل موت صامت */
+if(typeof supabase==='undefined'){
+  document.body.innerHTML='<div style="padding:60px 30px;text-align:center;font-family:Tajawal,sans-serif;color:#241F1C"><div style="font-size:40px">⚠️</div><h2>تعذر تحميل مكتبة الاتصال</h2><p>تأكد أن ملف supabase.js مرفوع مع الموقع ثم حدّث الصفحة</p></div>';
+  throw new Error('supabase.js missing');
+}
 const SB_URL = "https://gquzjaxpqeggknhipmzk.supabase.co";
 const SB_KEY = "sb_publishable_BNp6Fg3VLXa1Pf4V6QjncQ_f496PquX";
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -518,7 +523,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن16`;
+  $('totalPill').textContent=`${photos.length} صورة · ن17`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
