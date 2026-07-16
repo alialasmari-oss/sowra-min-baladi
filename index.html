@@ -65,11 +65,13 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .stars-mini{color:var(--star);letter-spacing:.5px;font-size:11px;white-space:nowrap}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;display:none;align-items:flex-end;justify-content:center}
 .overlay.show{display:flex}
-.sheet{background:var(--night);width:100%;max-width:680px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
+.sheet{background:var(--night);width:100%;max-width:760px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
 @keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
-.sheet .ph{height:auto;max-height:62vh;border-radius:0;display:flex;align-items:center;justify-content:center;background:#000}
-.sheet .ph img{width:100%;height:auto;max-height:62vh;object-fit:contain}
+.sheet .ph{height:45vh;min-height:240px;max-height:430px;border-radius:0;background:#000}
+.sheet .ph img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.sheet .ph.full{height:auto;max-height:none}
+.sheet .ph.full img{height:auto;max-height:82vh;object-fit:contain;cursor:zoom-out}
 .sheet-body{padding:16px 20px 30px}
 .sheet-title{font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--sand)}
 .sheet-loc{color:var(--txt-dim);font-size:13px;margin:4px 0 14px;line-height:1.7}
@@ -442,7 +444,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن9`;
+  $('totalPill').textContent=`${photos.length} صورة · ن10`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -470,6 +472,8 @@ async function openSheet(id){
   curId=id;curPhoto=photos.find(x=>x.id===id);
   const p=curPhoto;
   $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${p.title}">`;
+  $('sPh').classList.remove('full');
+  $('sPh').onclick=()=>$('sPh').classList.toggle('full');
   $('sTitle').textContent=p.title;
   $('sLoc').innerHTML=`📍 ${p.region} · ${p.city}${p.village?' · '+p.village:''} — عدسة ${p.photographer}`
     +(p.lat?`<br><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="color:var(--palm);text-decoration:none">🗺️ الموقع الدقيق على الخريطة</a>`:'');
