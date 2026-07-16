@@ -7,8 +7,8 @@
 <meta name="application-name" content="صورة من بلدي">
 <meta name="apple-mobile-web-app-title" content="صورة من بلدي">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#141210">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F1E3">
 <meta property="og:title" content="صورة من بلدي">
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
@@ -20,11 +20,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --night:#141210; --card:#1E1A16; --card2:#26211B;
-  --sand:#E8CF9F; --sand-dim:#B29B72;
-  --sadu:#C0392B; --sadu-deep:#8E2A20;
-  --palm:#4E7A4C; --star:#F2B33D;
-  --line:#332C24; --txt:#F3EADB; --txt-dim:#A69880;
+  --night:#F7F1E3;   /* خلفية كريمية — قماش القطّ */
+  --card:#FFFFFF;
+  --card2:#F1E8D6;
+  --sand:#8C2F23;    /* عناوين — أحمر قطّ عميق */
+  --sand-dim:#8A7B6A;
+  --sadu:#D63A2F;    /* الأحمر الرئيسي */
+  --sadu-deep:#A82A21;
+  --palm:#2E8B57;    /* أخضر القطّ */
+  --qblue:#2E6FB7;   /* أزرق القطّ */
+  --qteal:#2AA8A0;
+  --star:#E8A020;
+  --line:#D9CDB4;
+  --ink:#241F1C;     /* الخط الأسود المميز للقطّ */
+  --txt:#241F1C;
+  --txt-dim:#6B6259;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -34,7 +44,13 @@ body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);m
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
 ::-webkit-scrollbar-thumb:hover{background:var(--sand-dim)}
 html{scrollbar-color:var(--line) var(--night)}
-.sadu{height:10px;background:repeating-linear-gradient(45deg,var(--sadu) 0 8px,var(--night) 8px 16px,var(--sand) 16px 24px,var(--night) 24px 32px)}
+.sadu{
+  height:16px;
+  background-color:#F7F1E3;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='16' viewBox='0 0 128 16'%3E%3Crect width='128' height='16' fill='%23F7F1E3'/%3E%3Cpath d='M0 15 L16 2 L32 15 Z' fill='%23D63A2F' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M32 15 L48 2 L64 15 Z' fill='%232E6FB7' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M64 15 L80 2 L96 15 Z' fill='%23F2B33D' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M96 15 L112 2 L128 15 Z' fill='%232E8B57' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cline x1='0' y1='15.4' x2='128' y2='15.4' stroke='%23241F1C' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat:repeat-x;
+  background-size:128px 16px;
+}
 header{padding:18px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:linear-gradient(var(--night) 78%,transparent)}
 .logo{font-family:'Reem Kufi',sans-serif;font-size:26px;font-weight:700;color:var(--sand);line-height:1}
 .logo span{font-size:13px;display:block;font-family:'Tajawal';font-weight:500;color:var(--txt-dim);margin-top:3px}
@@ -50,20 +66,20 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .sort-tab.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
 .feed{padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
 .feed .empty,.feed .loader{grid-column:1/-1}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
+.card{background:var(--card);border:1.5px solid var(--line);box-shadow:0 2px 8px rgba(36,31,28,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
 .card:hover{transform:translateY(-3px);border-color:var(--sand-dim)}
 .card:active{transform:scale(.97)}
 .ph{position:relative;height:150px;overflow:hidden;background:var(--card2)}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.medal{position:absolute;top:7px;right:7px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--star);display:flex;align-items:center;gap:4px}
-.badge-tag{position:absolute;top:7px;left:7px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border:1px solid var(--sadu);border-radius:10px;padding:3px 7px;font-size:9.5px;color:var(--sand);font-weight:700;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.loc-chip{position:absolute;bottom:7px;right:7px;background:rgba(20,18,16,.82);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:10.5px;color:var(--sand);max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.medal{position:absolute;top:7px;right:7px;background:rgba(255,255,255,.9);border:1px solid var(--line);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--star);display:flex;align-items:center;gap:4px}
+.badge-tag{position:absolute;top:7px;left:7px;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:1px solid var(--sadu);border-radius:10px;padding:3px 7px;font-size:9.5px;color:var(--sand);font-weight:700;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loc-chip{position:absolute;bottom:7px;right:7px;background:rgba(255,255,255,.9);border:1px solid var(--line);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:10.5px;color:var(--sand);max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-body{padding:9px 11px 11px}
 .card-title{font-size:13.5px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--txt-dim)}
 .card-meta .who{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-inline-start:6px}
 .stars-mini{color:var(--star);letter-spacing:.5px;font-size:11px;white-space:nowrap}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.overlay{position:fixed;inset:0;background:rgba(36,31,28,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
 .overlay.show{display:flex}
 .sheet{background:var(--night);width:100%;max-width:760px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
 @keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
@@ -98,7 +114,7 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .btn{background:var(--sadu);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:'Tajawal';font-weight:700;font-size:14px;cursor:pointer}
 .btn:active{background:var(--sadu-deep)}
 .btn:disabled{opacity:.5}
-.close-x{position:sticky;top:10px;margin:10px 18px -40px auto;z-index:5;width:34px;height:34px;border-radius:50%;background:rgba(20,18,16,.85);color:var(--txt);border:1px solid var(--line);font-size:16px;cursor:pointer;display:block}
+.close-x{position:sticky;top:10px;margin:10px 18px -40px auto;z-index:5;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--txt);border:1px solid var(--line);font-size:16px;cursor:pointer;display:block}
 .form{padding:6px 20px 160px}
 .form h2{font-family:'Reem Kufi',sans-serif;color:var(--sand);font-size:22px;margin-bottom:4px}
 .form p.hint{color:var(--txt-dim);font-size:13px;margin-bottom:18px}
@@ -109,7 +125,7 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .cap-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 10px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;transition:.15s}
 .cap-btn b{font-size:14px}
 .cap-btn small{font-size:11px;color:var(--txt-dim);font-weight:400}
-.cap-btn.live{border-color:var(--sadu);background:linear-gradient(160deg,var(--card),rgba(192,57,43,.14))}
+.cap-btn.live{border-color:var(--sadu);background:linear-gradient(160deg,var(--card),rgba(214,58,47,.08))}
 .cap-btn:active{transform:scale(.96)}
 .geo-card{background:var(--card);border:1px solid var(--palm);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13px}
 .geo-card.warn{border-color:var(--star)}
@@ -119,13 +135,13 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .drop{border:2px dashed var(--line);border-radius:18px;padding:20px;text-align:center;color:var(--txt-dim);margin-bottom:16px;background:var(--card)}
 .drop.has{border-color:var(--palm);color:var(--palm)}
 .drop img{max-width:100%;max-height:200px;border-radius:12px;margin-top:10px}
-.submit-btn{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:480px;z-index:35;padding:15px;font-size:16px;box-shadow:0 6px 20px rgba(192,57,43,.5)}
+.submit-btn{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:480px;z-index:35;padding:15px;font-size:16px;box-shadow:0 6px 20px rgba(214,58,47,.4)}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
 .nav-btn{flex:1;background:none;border:none;color:var(--txt-dim);font-family:'Tajawal';font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px}
 .nav-btn .ic{font-size:20px}
 .nav-btn.on{color:var(--sand)}
 .nav-btn.add-main{position:relative;top:-16px}
-.nav-btn.add-main .ic{width:52px;height:52px;border-radius:50%;background:var(--sadu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px rgba(192,57,43,.45)}
+.nav-btn.add-main .ic{width:52px;height:52px;border-radius:50%;background:var(--sadu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px rgba(214,58,47,.35)}
 .empty{text-align:center;padding:50px 30px;color:var(--txt-dim);font-size:14px;line-height:1.9}
 .empty .big{font-size:40px;display:block;margin-bottom:8px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--palm);color:#fff;padding:11px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:99;display:none;white-space:nowrap}
@@ -444,7 +460,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن10`;
+  $('totalPill').textContent=`${photos.length} صورة · ن11`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
