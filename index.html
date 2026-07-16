@@ -233,71 +233,68 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 </div>
 
 <!-- ====== الحساب ====== -->
-<div class="overlay" id="accSheet">
-  <div class="sheet" style="max-height:none;padding-bottom:20px">
-    <button class="close-x" onclick="$('accSheet').classList.remove('show')" style="position:absolute;margin:12px 18px 0 0">✕</button>
-    <div class="sheet-body" style="padding-top:26px">
-      <!-- غير مسجل -->
-      <div id="accOut">
-        <div class="sheet-title">👤 حسابي</div>
-        <div class="sheet-loc">سجّل عشان صورك تنسب لك وتحفظ حقوقك</div>
-        <div class="sort-tabs" style="margin-bottom:14px">
-          <div class="sort-tab on" id="accTabIn" onclick="accTab('in')">دخول</div>
-          <div class="sort-tab" id="accTabUp" onclick="accTab('up')">حساب جديد</div>
-        </div>
-        <input id="accName" placeholder="اسمك (يظهر مع صورك)" style="display:none;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
-        <input type="email" id="accEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
-        <input type="password" id="accPass" placeholder="كلمة السر" autocomplete="current-password" onkeydown="if(event.key==='Enter')accSubmit()" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
-        <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
+<!-- ====== صفحة الحساب ====== -->
+<div class="page" id="page-acc">
+  <div class="form">
+    <!-- غير مسجل -->
+    <div id="accOut">
+      <h2>👤 حسابي</h2>
+      <p class="hint">سجّل عشان صورك تنسب لك وتحفظ حقوقك</p>
+      <div class="sort-tabs" style="margin-bottom:14px">
+        <div class="sort-tab on" id="accTabIn" onclick="accTab('in')">دخول</div>
+        <div class="sort-tab" id="accTabUp" onclick="accTab('up')">حساب جديد</div>
       </div>
-      <!-- مسجل -->
-      <div id="accIn" style="display:none">
-        <div class="sheet-title">👤 <span id="accHello"></span></div>
-        <div class="sheet-loc" id="accMail"></div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input id="accEditName" placeholder="اسمك الظاهر مع صورك" style="flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none">
+      <div class="f-group" id="accNameGrp" style="display:none"><label>اسمك (يظهر مع صورك)</label><input id="accName" placeholder="أبو الذيابة"></div>
+      <div class="f-group"><label>الإيميل</label><input type="email" id="accEmail" autocomplete="username"></div>
+      <div class="f-group"><label>كلمة السر</label><input type="password" id="accPass" autocomplete="current-password" onkeydown="if(event.key==='Enter')accSubmit()"></div>
+      <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
+    </div>
+    <!-- مسجل -->
+    <div id="accIn" style="display:none">
+      <h2>👤 <span id="accHello"></span></h2>
+      <p class="hint" id="accMail"></p>
+      <div class="f-group"><label>اسمك الظاهر مع صورك</label>
+        <div style="display:flex;gap:8px">
+          <input id="accEditName" style="flex:1">
           <button class="btn" onclick="saveMyName()">حفظ</button>
         </div>
-        <button class="btn" id="accAdminBtn" style="width:100%;padding:13px;margin-bottom:10px;display:none" onclick="$('accSheet').classList.remove('show');openAdmin()">⚙️ فتح لوحة الإشراف</button>
-        <button class="btn" style="width:100%;padding:13px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="accLogout()">🚪 تسجيل الخروج</button>
       </div>
+      <button class="btn" id="accAdminBtn" style="width:100%;padding:13px;margin-bottom:10px;display:none" onclick="openAdmin()">⚙️ فتح لوحة الإشراف</button>
+      <button class="btn" style="width:100%;padding:13px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="accLogout()">🚪 تسجيل الخروج</button>
     </div>
   </div>
 </div>
 
-<!-- ====== لوحة الإشراف ====== -->
-<div class="overlay" id="admPanel">
-  <div class="sheet">
-    <button class="close-x" onclick="$('admPanel').classList.remove('show')">✕</button>
-    <div class="sheet-body">
-      <div class="sheet-title">⚙️ لوحة الإشراف</div>
-      <div class="sort-tabs" style="margin:12px 0">
-        <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
-        <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
-        <div class="sort-tab" id="admTabPlc" onclick="admSetTab('plc')">📍 الأماكن</div>
-      </div>
-      <div id="admPlaces" style="display:none">
-        <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
-          <div style="font-weight:700;font-size:14px;margin-bottom:10px">إضافة مكان جديد</div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <select id="plcRegion" style="flex:1" onchange="plcFillCities()"></select>
-            <select id="plcCity" style="flex:1"></select>
-          </div>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input id="plcName" placeholder="اسم المكان" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none">
-            <select id="plcKind" style="flex:0 0 110px">
-              <option value="city">مدينة</option>
-              <option value="village">قرية</option>
-              <option value="landmark">معلم</option>
-            </select>
-          </div>
-          <button class="btn" style="width:100%" onclick="admAddPlace()">➕ إضافة</button>
-        </div>
-        <div id="plcList"></div>
-      </div>
-      <div id="admList"><div class="empty">⏳</div></div>
-      <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line)" onclick="admLogout()">🚪 خروج المشرف</button>
+<!-- ====== صفحة الإشراف ====== -->
+<div class="page" id="page-adm">
+  <div class="form">
+    <h2>⚙️ لوحة الإشراف</h2>
+    <div class="sort-tabs" style="margin:12px 0">
+      <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
+      <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
+      <div class="sort-tab" id="admTabPlc" onclick="admSetTab('plc')">📍 الأماكن</div>
     </div>
+    <div id="admPlaces" style="display:none">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:10px">إضافة مكان جديد</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="plcRegion" style="flex:1" onchange="plcFillCities()"></select>
+          <select id="plcCity" style="flex:1"></select>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input id="plcName" placeholder="اسم المكان" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none">
+          <select id="plcKind" style="flex:0 0 110px">
+            <option value="city">مدينة</option>
+            <option value="village">قرية</option>
+            <option value="landmark">معلم</option>
+          </select>
+        </div>
+        <button class="btn" style="width:100%" onclick="admAddPlace()">➕ إضافة</button>
+      </div>
+      <div id="plcList"></div>
+    </div>
+    <div id="admList"><div class="empty">⏳</div></div>
+    <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admLogout()">🚪 خروج المشرف</button>
   </div>
 </div>
 
@@ -523,7 +520,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن17`;
+  $('totalPill').textContent=`${photos.length} صورة · ن18`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -751,13 +748,13 @@ let accMode='in';
 function openAcc(){
   if(USER && !USER.is_anonymous)renderAccIn();
   else{$('accOut').style.display='block';$('accIn').style.display='none'}
-  $('accSheet').classList.add('show');
+  go('acc');
 }
 function accTab(m){
   accMode=m;
   $('accTabIn').classList.toggle('on',m==='in');
   $('accTabUp').classList.toggle('on',m==='up');
-  $('accName').style.display=m==='up'?'block':'none';
+  $('accNameGrp').style.display=m==='up'?'block':'none';
   $('accGo').textContent=m==='up'?'إنشاء الحساب':'دخول';
 }
 async function renderAccIn(){
@@ -800,7 +797,7 @@ async function accSubmit(){
     await checkAdmin();
     await renderAccIn();
     toast(IS_ADMIN?'أهلاً بالمشرف 👮':'حياك الله 🌟');
-    if(IS_ADMIN){$('accSheet').classList.remove('show');openAdmin()}
+    if(IS_ADMIN)openAdmin();
     await loadPhotos();
   }catch(e){
     toast(e.message&&e.message.includes('Invalid')?'بيانات الدخول غير صحيحة':(e.message||'تعذرت العملية'),true);
@@ -810,7 +807,7 @@ async function accLogout(){await sb.auth.signOut();location.reload()}
 async function admLogout(){await accLogout()}
 
 async function openAdmin(){
-  $('admPanel').classList.add('show');
+  go('adm');
   $('admList').innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
   const [ph,rp]=await Promise.all([
     sb.from('photos').select('*, profiles!user_id(display_name, banned)').order('created_at',{ascending:false}),
@@ -932,9 +929,10 @@ async function admClear(id){
 function go(p){
   if(p==='add' && (!USER || USER.is_anonymous)){
     toast('سجّل أول عشان تنشر صورك باسمك 📸');
-    openAcc();
-    return;
+    p='acc';
+    $('accOut').style.display='block';$('accIn').style.display='none';
   }
+  if(p==='adm' && !IS_ADMIN)p='feed';
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
   $('page-'+p).classList.add('on');
   $('nb-feed').classList.toggle('on',p==='feed');
