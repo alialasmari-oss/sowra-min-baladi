@@ -91,7 +91,7 @@ async function logout(){await sb.auth.signOut();location.reload()}
 
 async function load(){
   const [ph,rp]=await Promise.all([
-    sb.from('photos').select('*, profiles(display_name, banned)').order('created_at',{ascending:false}),
+    sb.from('photos').select('*, profiles!user_id(display_name, banned)').order('created_at',{ascending:false}),
     sb.from('reports').select('photo_id')
   ]);
   photos=ph.data||[];
