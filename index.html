@@ -233,9 +233,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 </div>
 
 <!-- ====== الحساب ====== -->
-<div class="overlay" id="accSheet" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="overlay" id="accSheet">
   <div class="sheet" style="max-height:none;padding-bottom:20px">
-    <div class="sheet-body">
+    <button class="close-x" onclick="$('accSheet').classList.remove('show')" style="position:absolute;margin:12px 18px 0 0">✕</button>
+    <div class="sheet-body" style="padding-top:26px">
       <!-- غير مسجل -->
       <div id="accOut">
         <div class="sheet-title">👤 حسابي</div>
@@ -246,7 +247,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
         </div>
         <input id="accName" placeholder="اسمك (يظهر مع صورك)" style="display:none;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
         <input type="email" id="accEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
-        <input type="password" id="accPass" placeholder="كلمة السر" autocomplete="current-password" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
+        <input type="password" id="accPass" placeholder="كلمة السر" autocomplete="current-password" onkeydown="if(event.key==='Enter')accSubmit()" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
         <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
       </div>
       <!-- مسجل -->
@@ -504,7 +505,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن13`;
+  $('totalPill').textContent=`${photos.length} صورة · ن14`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
