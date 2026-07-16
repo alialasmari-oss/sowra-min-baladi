@@ -85,9 +85,11 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 @keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet .ph{height:45vh;min-height:240px;max-height:430px;border-radius:0;background:#000}
-.sheet .ph img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.sheet .ph img{width:100%;height:100%;object-fit:cover}
+.zoombtn{position:absolute;bottom:10px;left:10px;z-index:6;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;padding:7px 13px;font-family:'Tajawal';font-size:12px;font-weight:700;color:var(--txt);cursor:pointer}
+.close-x{z-index:30 !important;width:40px;height:40px;font-size:18px}
 .sheet .ph.full{height:auto;max-height:none}
-.sheet .ph.full img{height:auto;max-height:82vh;object-fit:contain;cursor:zoom-out}
+.sheet .ph.full img{height:auto;max-height:82vh;object-fit:contain}
 .sheet-body{padding:16px 20px 30px}
 .sheet-title{font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--sand)}
 .sheet-loc{color:var(--txt-dim);font-size:13px;margin:4px 0 14px;line-height:1.7}
@@ -540,7 +542,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن20`;
+  $('totalPill').textContent=`${photos.length} صورة · ن21`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -567,9 +569,9 @@ function render(){
 async function openSheet(id){
   curId=id;curPhoto=photos.find(x=>x.id===id);
   const p=curPhoto;
-  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${p.title}">`;
+  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${p.title}">
+    <button class="zoombtn" id="zoomBtn" onclick="togglePhotoZoom()">⤢ عرض كامل</button>`;
   $('sPh').classList.remove('full');
-  $('sPh').onclick=()=>$('sPh').classList.toggle('full');
   $('sTitle').textContent=p.title;
   $('sLoc').innerHTML=`📍 ${p.region} · ${p.city}${p.village?' · '+p.village:''} — عدسة ${p.photographer}`
     +(p.lat?`<br><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="color:var(--palm);text-decoration:none">🗺️ الموقع الدقيق على الخريطة</a>`:'');
@@ -591,6 +593,10 @@ async function openSheet(id){
   drawStars();renderPoll();renderComments();
 }
 function closeSheet(){$('overlay').classList.remove('show');document.body.style.overflow=''}
+function togglePhotoZoom(){
+  const full=$('sPh').classList.toggle('full');
+  $('zoomBtn').textContent=full?'⤡ تصغير':'⤢ عرض كامل';
+}
 
 function drawStars(){
   $('bigStars').innerHTML=[1,2,3,4,5].map(n=>
