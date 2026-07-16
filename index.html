@@ -120,7 +120,8 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .form p.hint{color:var(--txt-dim);font-size:13px;margin-bottom:18px}
 .f-group{margin-bottom:14px}
 .f-group label{display:block;font-size:13px;color:var(--sand-dim);margin-bottom:6px;font-weight:500}
-.f-group input,.f-group select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none}
+.f-group input,.f-group select,.f-group textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none}
+.f-group textarea{resize:vertical;min-height:90px}
 .cap-row{display:flex;gap:10px;margin-bottom:14px}
 .cap-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 10px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;transition:.15s}
 .cap-btn b{font-size:14px}
@@ -262,6 +263,23 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
       <button class="btn" id="accAdminBtn" style="width:100%;padding:13px;margin-bottom:10px;display:none" onclick="openAdmin()">⚙️ فتح لوحة الإشراف</button>
       <button class="btn" style="width:100%;padding:13px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="accLogout()">🚪 تسجيل الخروج</button>
     </div>
+    <!-- راسل الإدارة -->
+    <div style="margin-top:28px;border-top:2px dashed var(--line);padding-top:20px">
+      <h2 style="font-size:18px">📨 راسل الإدارة</h2>
+      <p class="hint">اقتراحك أو ملاحظتك توصل الإدارة مباشرة</p>
+      <div class="f-group"><label>نوع الرسالة</label>
+        <select id="fbKind">
+          <option value="suggestion">💡 اقتراح</option>
+          <option value="complaint">⚠️ شكوى</option>
+          <option value="question">❓ استفسار</option>
+          <option value="other">📝 أخرى</option>
+        </select>
+      </div>
+      <div class="f-group"><label>رسالتك</label>
+        <textarea id="fbBody" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+      </div>
+      <button class="btn" style="width:100%;padding:13px" id="fbGo" onclick="sendFeedback()">إرسال 📨</button>
+    </div>
   </div>
 </div>
 
@@ -270,10 +288,12 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
   <div class="form">
     <h2>⚙️ لوحة الإشراف</h2>
     <div class="sort-tabs" style="margin:12px 0">
-      <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
-      <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
-      <div class="sort-tab" id="admTabPlc" onclick="admSetTab('plc')">📍 الأماكن</div>
+      <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 بلاغات</div>
+      <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ الصور</div>
+      <div class="sort-tab" id="admTabPlc" onclick="admSetTab('plc')">📍 أماكن</div>
+      <div class="sort-tab" id="admTabFb" onclick="admSetTab('fb')">📨 رسائل</div>
     </div>
+    <div id="admFb" style="display:none"></div>
     <div id="admPlaces" style="display:none">
       <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
         <div style="font-weight:700;font-size:14px;margin-bottom:10px">إضافة مكان جديد</div>
@@ -520,7 +540,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن18`;
+  $('totalPill').textContent=`${photos.length} صورة · ن19`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -825,11 +845,58 @@ function admSetTab(t){
   $('admTabRep').classList.toggle('on',t==='rep');
   $('admTabAll').classList.toggle('on',t==='all');
   $('admTabPlc').classList.toggle('on',t==='plc');
+  $('admTabFb').classList.toggle('on',t==='fb');
   $('admPlaces').style.display=t==='plc'?'block':'none';
-  $('admList').style.display=t==='plc'?'none':'block';
-  if(t==='plc')renderPlaces();else admRender();
+  $('admFb').style.display=t==='fb'?'block':'none';
+  $('admList').style.display=(t==='rep'||t==='all')?'block':'none';
+  if(t==='plc')renderPlaces();
+  else if(t==='fb')loadFb();
+  else admRender();
 }
 const KIND_AR={city:'مدينة',village:'قرية',landmark:'معلم'};
+/* ====== مراسلة الإدارة ====== */
+const FB_AR={suggestion:'💡 اقتراح',complaint:'⚠️ شكوى',question:'❓ استفسار',other:'📝 أخرى'};
+async function sendFeedback(){
+  const kind=$('fbKind').value,body=$('fbBody').value.trim();
+  if(body.length<3)return toast('اكتب رسالتك أول',true);
+  const b=$('fbGo');b.disabled=true;b.textContent='⏳';
+  const { error } = await sb.from('feedback').insert({user_id:USER.id,kind,body});
+  b.disabled=false;b.textContent='إرسال 📨';
+  if(error){toast('تعذر الإرسال: '+error.message,true);return}
+  $('fbBody').value='';
+  toast('وصلت رسالتك للإدارة، شكراً لك 🙏');
+}
+async function loadFb(){
+  $('admFb').innerHTML='<div class="empty">⏳</div>';
+  const { data, error } = await sb.from('feedback').select('*, profiles!user_id(display_name)').order('created_at',{ascending:false});
+  if(error){$('admFb').innerHTML=`<div class="empty">⚠️ ${error.message}</div>`;return}
+  if(!data.length){$('admFb').innerHTML='<div class="empty">📭 ما فيه رسائل بعد</div>';return}
+  $('admFb').innerHTML=data.map(f=>`
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px;${f.status==='done'?'opacity:.55':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--card2);border:1px solid var(--line)">${FB_AR[f.kind]||f.kind}</span>
+        <span style="font-size:11px;color:var(--txt-dim)">${f.profiles?.display_name||'زائر'} · ${new Date(f.created_at).toLocaleDateString('ar-SA')}</span>
+      </div>
+      <div style="font-size:14px;line-height:1.8;margin-bottom:10px">${f.body}</div>
+      <div style="display:flex;gap:8px">
+        ${f.status==='new'
+          ?`<button class="btn" style="font-size:12px;padding:7px 14px;background:var(--palm)" onclick="fbDone(${f.id})">✓ تم التعامل</button>`
+          :`<span style="font-size:12px;color:var(--palm);font-weight:700;padding:7px 0">✓ منتهية</span>`}
+        <button class="btn" style="font-size:12px;padding:7px 14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="fbDel(${f.id})">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+async function fbDone(id){
+  const { error } = await sb.from('feedback').update({status:'done'}).eq('id',id);
+  if(error){toast('فشلت العملية',true);return}
+  loadFb();
+}
+async function fbDel(id){
+  if(!confirm('حذف الرسالة نهائياً؟'))return;
+  const { error } = await sb.from('feedback').delete().eq('id',id);
+  if(error){toast('فشل الحذف',true);return}
+  loadFb();
+}
 function plcFillCities(){
   const r=$('plcRegion').value,c=$('plcCity');
   c.innerHTML='<option value="">المدينة (اختياري)</option>';
