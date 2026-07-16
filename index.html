@@ -202,6 +202,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
     <div class="f-group"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
     <div class="f-group"><label>القرية أو الحي (اختياري)</label><input id="aVillage" list="villList" placeholder="مثال: قرية رجال ألمع"><datalist id="villList"></datalist></div>
     <button class="btn submit-btn" id="pubBtn" onclick="addPhoto()">انشر الصورة 🚀</button>
+    <div style="text-align:center;font-size:11.5px;color:var(--txt-dim);margin-top:2px">بنشرك الصورة تؤكد التزامك <a href="terms.html" target="_blank" style="color:var(--txt-dim);font-weight:700">بالشروط والتعهد</a></div>
   </div>
 </div>
 
@@ -250,7 +251,16 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
       <div class="f-group" id="accNameGrp" style="display:none"><label>اسمك (يظهر مع صورك)</label><input id="accName" placeholder="أبو الذيابة"></div>
       <div class="f-group"><label>الإيميل</label><input type="email" id="accEmail" autocomplete="username"></div>
       <div class="f-group"><label>كلمة السر</label><input type="password" id="accPass" autocomplete="current-password" onkeydown="if(event.key==='Enter')accSubmit()"></div>
+      <div id="pledgeBox" style="display:none;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:14px">
+        <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.9">
+          <input type="checkbox" id="pledgeChk" style="width:20px;height:20px;margin-top:4px;accent-color:var(--sadu);flex:0 0 auto">
+          <span>أوافق على <a href="terms.html" target="_blank" style="color:var(--sadu);font-weight:700">الشروط والأحكام</a> و<a href="privacy.html" target="_blank" style="color:var(--sadu);font-weight:700">سياسة الخصوصية</a>، وأتعهد بعدم نشر أي محتوى يخالف أنظمة المملكة أو الآداب العامة أو ينتهك خصوصية الآخرين وحقوقهم.</span>
+        </label>
+      </div>
       <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--txt-dim)">
+        <a href="terms.html" target="_blank" style="color:var(--txt-dim)">الشروط والأحكام</a> · <a href="privacy.html" target="_blank" style="color:var(--txt-dim)">سياسة الخصوصية</a>
+      </div>
     </div>
     <!-- مسجل -->
     <div id="accIn" style="display:none">
@@ -542,7 +552,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن21`;
+  $('totalPill').textContent=`${photos.length} صورة · ن22`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -788,6 +798,7 @@ function accTab(m){
   $('accTabIn').classList.toggle('on',m==='in');
   $('accTabUp').classList.toggle('on',m==='up');
   $('accNameGrp').style.display=m==='up'?'block':'none';
+  $('pledgeBox').style.display=m==='up'?'block':'none';
   $('accGo').textContent=m==='up'?'إنشاء الحساب':'دخول';
 }
 async function renderAccIn(){
@@ -815,6 +826,7 @@ async function accSubmit(){
     if(accMode==='up'){
       const name=$('accName').value.trim();
       if(!name){toast('اكتب اسمك',true);return}
+      if(!$('pledgeChk').checked){toast('لازم توافق على الشروط والتعهد أول ✋',true);return}
       const { data, error } = await sb.auth.signUp({
         email,password:pass,options:{data:{display_name:name}}
       });
