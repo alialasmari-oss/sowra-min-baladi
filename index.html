@@ -197,7 +197,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
     <div class="f-group"><label>عنوان الصورة</label><input id="aTitle" placeholder="مثال: غروب على جبال السودة"></div>
     <div class="f-group"><label>المنطقة</label><select id="aRegion" onchange="fillAddCities()"></select></div>
     <div class="f-group"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
-    <div class="f-group"><label>القرية أو الحي (اختياري)</label><input id="aVillage" placeholder="مثال: قرية رجال ألمع"></div>
+    <div class="f-group"><label>القرية أو الحي (اختياري)</label><input id="aVillage" list="villList" placeholder="مثال: قرية رجال ألمع"><datalist id="villList"></datalist></div>
     <button class="btn submit-btn" id="pubBtn" onclick="addPhoto()">انشر الصورة 🚀</button>
   </div>
 </div>
@@ -273,6 +273,23 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
       <div class="sort-tabs" style="margin:12px 0">
         <div class="sort-tab on" id="admTabRep" onclick="admSetTab('rep')">🚩 المبلغ عنها</div>
         <div class="sort-tab" id="admTabAll" onclick="admSetTab('all')">🗂️ كل الصور</div>
+        <div class="sort-tab" id="admTabPlc" onclick="admSetTab('plc')">📍 الأماكن</div>
+      </div>
+      <div id="admPlaces" style="display:none">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:10px">إضافة مكان جديد</div>
+          <select id="plcRegion" style="width:100%;margin-bottom:8px"></select>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="plcName" placeholder="اسم المكان" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none">
+            <select id="plcKind" style="flex:0 0 110px">
+              <option value="city">مدينة</option>
+              <option value="village">قرية</option>
+              <option value="landmark">معلم</option>
+            </select>
+          </div>
+          <button class="btn" style="width:100%" onclick="admAddPlace()">➕ إضافة</button>
+        </div>
+        <div id="plcList"></div>
       </div>
       <div id="admList"><div class="empty">⏳</div></div>
       <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line)" onclick="admLogout()">🚪 خروج المشرف</button>
@@ -309,7 +326,7 @@ async function saveName(name){
 }
 
 /* ============ المناطق والمدن ============ */
-const GEO = {
+const BASE_GEO = {
   "منطقة الرياض":["الرياض","الدرعية","الخرج","المجمعة","الزلفي","شقراء","وادي الدواسر","الأفلاج"],
   "منطقة مكة المكرمة":["مكة المكرمة","جدة","الطائف","القنفذة","الليث","رابغ"],
   "منطقة المدينة المنورة":["المدينة المنورة","ينبع","العلا","بدر","خيبر"],
@@ -324,6 +341,28 @@ const GEO = {
   "منطقة الباحة":["الباحة","بلجرشي","المندق","قلوة"],
   "منطقة الجوف":["سكاكا","دومة الجندل","القريات"]
 };
+
+/* الأماكن المخصصة من القاعدة تندمج مع الأساس */
+let GEO = {}, VILL = {}, customPlaces = [];
+function rebuildGeo(){
+  GEO = JSON.parse(JSON.stringify(BASE_GEO));
+  VILL = {};
+  for(const c of customPlaces){
+    if(!GEO[c.region]) GEO[c.region] = [];
+    if(c.kind === 'city'){
+      if(!GEO[c.region].includes(c.name)) GEO[c.region].push(c.name);
+    }else{
+      (VILL[c.region] = VILL[c.region] || []).push(c.name);
+    }
+  }
+}
+async function loadPlaces(){
+  const { data } = await sb.from('custom_places').select('*').order('name');
+  customPlaces = data || [];
+  rebuildGeo();
+  initSelects();fillCities();fillAddCities();
+}
+rebuildGeo();
 const COORDS = {
 "الرياض":[24.71,46.68],"الدرعية":[24.74,46.57],"الخرج":[24.15,47.30],"المجمعة":[25.90,45.35],"الزلفي":[26.30,44.80],"شقراء":[25.24,45.25],"وادي الدواسر":[20.46,44.79],"الأفلاج":[22.28,46.73],
 "مكة المكرمة":[21.39,39.86],"جدة":[21.49,39.19],"الطائف":[21.27,40.42],"القنفذة":[19.13,41.08],"الليث":[20.15,40.27],"رابغ":[22.80,39.03],
@@ -439,6 +478,7 @@ async function loadPhotos(){
 /* ============ الفلاتر والعرض ============ */
 function initSelects(){
   const fr=$('fRegion'),ar=$('aRegion');
+  fr.innerHTML='<option value="">كل المناطق</option>';
   ar.innerHTML='<option value="">اختر المنطقة</option>';
   for(const r in GEO){fr.innerHTML+=`<option>${r}</option>`;ar.innerHTML+=`<option>${r}</option>`;}
 }
@@ -451,6 +491,7 @@ function fillAddCities(){
   const r=$('aRegion').value,c=$('aCity');
   c.innerHTML='<option value="">اختر المدينة</option>';
   if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
+  $('villList').innerHTML=(r&&VILL[r]?VILL[r]:[]).map(v=>`<option value="${v}">`).join('');
 }
 function setSort(m){sortMode=m;$('tabTop').classList.toggle('on',m==='top');$('tabNew').classList.toggle('on',m==='new');render()}
 
@@ -463,7 +504,7 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن12`;
+  $('totalPill').textContent=`${photos.length} صورة · ن13`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -761,9 +802,55 @@ async function openAdmin(){
   admPhotos=ph.data||[];
   admReps={};
   (rp.data||[]).forEach(r=>admReps[r.photo_id]=(admReps[r.photo_id]||0)+1);
-  admRender();
+  admSetTab(admTab);
 }
-function admSetTab(t){admTab=t;$('admTabRep').classList.toggle('on',t==='rep');$('admTabAll').classList.toggle('on',t==='all');admRender()}
+function admSetTab(t){
+  admTab=t;
+  $('admTabRep').classList.toggle('on',t==='rep');
+  $('admTabAll').classList.toggle('on',t==='all');
+  $('admTabPlc').classList.toggle('on',t==='plc');
+  $('admPlaces').style.display=t==='plc'?'block':'none';
+  $('admList').style.display=t==='plc'?'none':'block';
+  if(t==='plc')renderPlaces();else admRender();
+}
+const KIND_AR={city:'مدينة',village:'قرية',landmark:'معلم'};
+function renderPlaces(){
+  const reg=$('plcRegion');
+  if(!reg.options.length){
+    reg.innerHTML='<option value="">اختر المنطقة</option>';
+    for(const r in BASE_GEO)reg.innerHTML+=`<option>${r}</option>`;
+  }
+  $('plcList').innerHTML=customPlaces.length
+    ?customPlaces.map(c=>`
+      <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
+        <div style="flex:1">
+          <b style="font-size:14px">${c.name}</b>
+          <div style="font-size:11px;color:var(--txt-dim)">${KIND_AR[c.kind]} · ${c.region}</div>
+        </div>
+        <button class="btn" style="font-size:12px;padding:7px 12px" onclick="admDelPlace(${c.id},'${c.name}')">🗑️ حذف</button>
+      </div>`).join('')
+    :`<div class="empty">ما فيه أماكن مضافة بعد — كل اللي تضيفه هنا يظهر فوراً بقوائم التطبيق</div>`;
+}
+async function admAddPlace(){
+  const region=$('plcRegion').value,name=$('plcName').value.trim(),kind=$('plcKind').value;
+  if(!region)return toast('اختر المنطقة',true);
+  if(name.length<2)return toast('اكتب اسم المكان',true);
+  const { error } = await sb.from('custom_places').insert({region,name,kind});
+  if(error){
+    toast(error.code==='23505'?'المكان مضاف من قبل':'تعذرت الإضافة',true);
+    return;
+  }
+  $('plcName').value='';
+  toast('انضاف المكان ✅');
+  await loadPlaces();renderPlaces();
+}
+async function admDelPlace(id,name){
+  if(!confirm(`حذف «${name}» من القوائم؟ (الصور المنشورة عليه ما تتأثر)`))return;
+  const { error } = await sb.from('custom_places').delete().eq('id',id);
+  if(error){toast('تعذر الحذف',true);return}
+  toast('انحذف المكان');
+  await loadPlaces();renderPlaces();
+}
 function admRender(){
   let list=admTab==='rep'?admPhotos.filter(p=>(admReps[p.id]||0)>0||p.hidden):admPhotos;
   if(!list.length){$('admList').innerHTML=`<div class="empty">${admTab==='rep'?'✅ ما فيه بلاغات — الساحة نظيفة':'ما فيه صور'}</div>`;return}
@@ -834,7 +921,7 @@ function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$(
 /* ============ البداية ============ */
 (async()=>{
   initSelects();fillAddCities();
-  try{await ensureAuth();await checkAdmin();await loadPhotos();}
+  try{await ensureAuth();await checkAdmin();await loadPlaces();await loadPhotos();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر الاتصال بالقاعدة<br>${e.message||''}</div>`}
 })();
 </script>
