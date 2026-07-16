@@ -663,6 +663,8 @@ async function openAdmin(){
     sb.from('photos').select('*, profiles(display_name, banned)').order('created_at',{ascending:false}),
     sb.from('reports').select('photo_id')
   ]);
+  if(ph.error){$('admList').innerHTML=`<div class="empty">⚠️ خطأ في جلب الصور:<br><span style="direction:ltr;display:inline-block;color:var(--sadu);font-size:12px">${ph.error.message}</span></div>`;return}
+  if(rp.error){$('admList').innerHTML=`<div class="empty">⚠️ خطأ في جلب البلاغات:<br><span style="direction:ltr;display:inline-block;color:var(--sadu);font-size:12px">${rp.error.message}</span></div>`;return}
   admPhotos=ph.data||[];
   admReps={};
   (rp.data||[]).forEach(r=>admReps[r.photo_id]=(admReps[r.photo_id]||0)+1);
