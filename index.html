@@ -115,7 +115,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 
 <div class="sadu"></div>
 <header>
-  <div class="logo" onclick="logoTap()">صورة من بلدي<span>عدسات أهل الديار</span></div>
+  <div class="logo">صورة من بلدي<span>عدسات أهل الديار</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <button id="admGear" style="display:none;background:var(--card);border:1px solid var(--sadu);border-radius:50%;width:36px;height:36px;font-size:17px;cursor:pointer;color:var(--sand)" onclick="openAdmin()">⚙️</button>
     <div class="count-pill" id="totalPill">...</div>
@@ -194,15 +194,30 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
   </div>
 </div>
 
-<!-- ====== دخول المشرف ====== -->
-<div class="overlay" id="admLogin" onclick="if(event.target===this)this.classList.remove('show')">
+<!-- ====== الحساب ====== -->
+<div class="overlay" id="accSheet" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="sheet" style="max-height:none;padding-bottom:20px">
     <div class="sheet-body">
-      <div class="sheet-title">👮 دخول المشرف</div>
-      <div class="sheet-loc">هذه المنطقة لإدارة التطبيق فقط</div>
-      <input type="email" id="admEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
-      <input type="password" id="admPass" placeholder="كلمة السر" autocomplete="current-password" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
-      <button class="btn" style="width:100%;padding:13px" id="admInBtn" onclick="admLoginGo()">دخول</button>
+      <!-- غير مسجل -->
+      <div id="accOut">
+        <div class="sheet-title">👤 حسابي</div>
+        <div class="sheet-loc">سجّل عشان صورك تنسب لك وتحفظ حقوقك</div>
+        <div class="sort-tabs" style="margin-bottom:14px">
+          <div class="sort-tab on" id="accTabIn" onclick="accTab('in')">دخول</div>
+          <div class="sort-tab" id="accTabUp" onclick="accTab('up')">حساب جديد</div>
+        </div>
+        <input id="accName" placeholder="اسمك (يظهر مع صورك)" style="display:none;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
+        <input type="email" id="accEmail" placeholder="الإيميل" autocomplete="username" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:10px">
+        <input type="password" id="accPass" placeholder="كلمة السر" autocomplete="current-password" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none;margin-bottom:12px">
+        <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
+      </div>
+      <!-- مسجل -->
+      <div id="accIn" style="display:none">
+        <div class="sheet-title">👤 <span id="accHello"></span></div>
+        <div class="sheet-loc" id="accMail"></div>
+        <button class="btn" id="accAdminBtn" style="width:100%;padding:13px;margin-bottom:10px;display:none" onclick="$('accSheet').classList.remove('show');openAdmin()">⚙️ فتح لوحة الإشراف</button>
+        <button class="btn" style="width:100%;padding:13px;background:var(--card2);border:1px solid var(--line)" onclick="accLogout()">🚪 تسجيل الخروج</button>
+      </div>
     </div>
   </div>
 </div>
@@ -225,6 +240,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 
 <nav>
   <button class="nav-btn on" id="nb-feed" onclick="go('feed')"><span class="ic">🏞️</span>الصور</button>
+  <button class="nav-btn" onclick="openAcc()"><span class="ic">👤</span>حسابي</button>
   <button class="nav-btn add-main" onclick="go('add')"><span class="ic">+</span></button>
   <button class="nav-btn" id="nb-top" onclick="goTop()"><span class="ic">🏆</span>المتصدرة</button>
 </nav>
@@ -617,44 +633,69 @@ async function addPhoto(){
 }
 
 /* ============ وضع المشرف ============ */
-let IS_ADMIN=false,tapCount=0,tapTimer=null,admTab='rep';
+let IS_ADMIN=false,admTab='rep';
 let admPhotos=[],admReps={};
 
-function logoTap(){
-  tapCount++;clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>tapCount=0,1600);
-  if(tapCount>=5){
-    tapCount=0;
-    if(IS_ADMIN)openAdmin();
-    else $('admLogin').classList.add('show');
-  }
-}
 async function checkAdmin(){
-  if(!USER||USER.is_anonymous){IS_ADMIN=false;return false}
+  if(!USER||USER.is_anonymous){IS_ADMIN=false;$('admGear').style.display='none';return false}
   const { data } = await sb.from('admins').select('id').maybeSingle();
   IS_ADMIN=!!data;
   $('admGear').style.display=IS_ADMIN?'block':'none';
   return IS_ADMIN;
 }
-async function admLoginGo(){
-  const b=$('admInBtn');b.disabled=true;b.textContent='⏳';
-  const { error } = await sb.auth.signInWithPassword({
-    email:$('admEmail').value.trim(),password:$('admPass').value
-  });
-  b.disabled=false;b.textContent='دخول';
-  if(error){toast('بيانات الدخول غير صحيحة',true);return}
-  const { data:{ session } } = await sb.auth.getSession();
-  USER=session.user;
-  if(await checkAdmin()){
-    $('admLogin').classList.remove('show');
-    toast('أهلاً بالمشرف 👮');
-    openAdmin();
-  }else{
-    toast('هذا الحساب ليس مشرفاً',true);
-    await sb.auth.signOut();location.reload();
-  }
+
+/* ============ الحساب الموحد ============ */
+let accMode='in';
+function openAcc(){
+  if(USER && !USER.is_anonymous)renderAccIn();
+  else{$('accOut').style.display='block';$('accIn').style.display='none'}
+  $('accSheet').classList.add('show');
 }
-async function admLogout(){await sb.auth.signOut();location.reload()}
+function accTab(m){
+  accMode=m;
+  $('accTabIn').classList.toggle('on',m==='in');
+  $('accTabUp').classList.toggle('on',m==='up');
+  $('accName').style.display=m==='up'?'block':'none';
+  $('accGo').textContent=m==='up'?'إنشاء الحساب':'دخول';
+}
+async function renderAccIn(){
+  const { data } = await sb.from('profiles').select('display_name').eq('id',USER.id).maybeSingle();
+  $('accHello').textContent='هلا '+(data?.display_name||'مصوّر');
+  $('accMail').textContent=USER.email||'';
+  $('accAdminBtn').style.display=IS_ADMIN?'block':'none';
+  $('accOut').style.display='none';$('accIn').style.display='block';
+}
+async function accSubmit(){
+  const email=$('accEmail').value.trim(),pass=$('accPass').value;
+  if(!email||!pass)return toast('عبّي الإيميل وكلمة السر',true);
+  const b=$('accGo');b.disabled=true;const old=b.textContent;b.textContent='⏳';
+  try{
+    if(accMode==='up'){
+      const name=$('accName').value.trim();
+      if(!name){toast('اكتب اسمك',true);return}
+      const { data, error } = await sb.auth.signUp({
+        email,password:pass,options:{data:{display_name:name}}
+      });
+      if(error)throw error;
+      if(!data.session){toast('أُرسل رابط تأكيد لإيميلك 📧');return}
+      USER=data.session.user;
+    }else{
+      const { error } = await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      const { data:{ session } } = await sb.auth.getSession();
+      USER=session.user;
+    }
+    await checkAdmin();
+    await renderAccIn();
+    toast(IS_ADMIN?'أهلاً بالمشرف 👮':'حياك الله 🌟');
+    if(IS_ADMIN){$('accSheet').classList.remove('show');openAdmin()}
+    await loadPhotos();
+  }catch(e){
+    toast(e.message&&e.message.includes('Invalid')?'بيانات الدخول غير صحيحة':(e.message||'تعذرت العملية'),true);
+  }finally{b.disabled=false;b.textContent=old}
+}
+async function accLogout(){await sb.auth.signOut();location.reload()}
+async function admLogout(){await accLogout()}
 
 async function openAdmin(){
   $('admPanel').classList.add('show');
