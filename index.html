@@ -16,7 +16,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="supabase.js"></script>
 <style>
 :root{
@@ -540,14 +540,14 @@ function render(){
   list.sort((a,b)=>sortMode==='top'
     ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
     :new Date(b.created_at)-new Date(a.created_at));
-  $('totalPill').textContent=`${photos.length} صورة · ن19`;
+  $('totalPill').textContent=`${photos.length} صورة · ن20`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
     const medal=sortMode==='top'&&i<3&&p.ratings_count>0?['🥇','🥈','🥉'][i]+' ':'';
     const tb=topBadge(p);
     return `<div class="card" onclick="openSheet(${p.id})">
-      <div class="ph"><img src="${imgUrl(p.image_path)}" loading="lazy" alt="${p.title}">
+      <div class="ph"><img src="${thumbUrl(p.image_path)}" onerror="this.onerror=null;this.src='${imgUrl(p.image_path)}'" loading="lazy" alt="${p.title}">
         <div class="medal">${medal}${Number(p.avg_stars).toFixed(1)} ★</div>
         ${tb?`<div class="badge-tag">${tb.label}</div>`:''}
         <div class="loc-chip">📍 ${p.village||p.city}</div>
@@ -705,20 +705,23 @@ async function pickImg(inp,isLive){
 }
 
 /* ضغط الصورة قبل الرفع (أقصى عرض 1600px) */
-function compress(file){
+function compressTo(file,maxW,quality){
   return new Promise(resolve=>{
     const img=new Image();
     img.onload=()=>{
-      const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height));
+      const scale=Math.min(1,maxW/Math.max(img.width,img.height));
       const cv=document.createElement('canvas');
       cv.width=Math.round(img.width*scale);cv.height=Math.round(img.height*scale);
       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-      cv.toBlob(b=>resolve(b||file),'image/jpeg',0.8);
+      cv.toBlob(b=>resolve(b||file),'image/jpeg',quality);
     };
     img.onerror=()=>resolve(file);
     img.src=URL.createObjectURL(file);
   });
 }
+function compress(file){return compressTo(file,1280,0.8)}
+const thumbPath=p=>p.replace(/\.jpg$/,'_t.jpg');
+function thumbUrl(p){return imgUrl(thumbPath(p))}
 
 async function addPhoto(){
   if(!USER || USER.is_anonymous){toast('سجّل أول عشان تنشر 📸');openAcc();return}
@@ -729,8 +732,12 @@ async function addPhoto(){
   const btn=$('pubBtn');btn.disabled=true;btn.textContent='⏳ جاري الرفع...';
   try{
     const blob=pendingBlob||await compress(pendingFile);
+    const thumb=await compressTo(pendingFile,420,0.7);
     const path=`${USER.id}/${Date.now()}.jpg`;
-    const up=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});
+    const [up,upT]=await Promise.all([
+      sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'}),
+      sb.storage.from('photos').upload(thumbPath(path),thumb,{contentType:'image/jpeg',cacheControl:'31536000'})
+    ]);
     if(up.error)throw up.error;
     const ins=await sb.from('photos').insert({
       user_id:USER.id,title,region,city,
@@ -1010,8 +1017,11 @@ function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$(
 /* ============ البداية ============ */
 (async()=>{
   initSelects();fillAddCities();
-  try{await ensureAuth();await checkAdmin();await loadPlaces();await loadPhotos();}
-  catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر الاتصال بالقاعدة<br>${e.message||''}</div>`}
+  // الدخول بالخلفية — والمحتوى العام يتحمل فوراً بالتوازي
+  const authP=ensureAuth().then(()=>checkAdmin()).catch(e=>toast('تعذر الاتصال بالحساب',true));
+  try{await Promise.all([loadPlaces(),loadPhotos()]);}
+  catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}
+  await authP;
 })();
 </script>
 </body>
