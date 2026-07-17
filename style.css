@@ -117,6 +117,20 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .f-group label{display:block;font-size:13px;color:var(--sand-dim);margin-bottom:6px;font-weight:500}
 .f-group input,.f-group select,.f-group textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none}
 .f-group textarea{resize:vertical;min-height:90px}
+/* ====== ترويسة إرشادات النشر ====== */
+.rules{background:var(--card);border:1.5px solid var(--ink);border-radius:16px;padding:0;margin-bottom:18px;overflow:hidden}
+.rules summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:12px 14px;background:var(--card2);list-style:none;user-select:none}
+.rules summary::-webkit-details-marker{display:none}
+.rules[open] summary{border-bottom:1px solid var(--line)}
+.rules-cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.rules-col{padding:12px 13px;display:flex;flex-direction:column;gap:7px;font-size:12px;line-height:1.7}
+.rules-col b{font-size:13px;margin-bottom:2px}
+.rules-col.ok{border-left:1px dashed var(--line)}
+.rules-col.ok b{color:var(--palm)}
+.rules-col.no b{color:var(--sadu)}
+.rules-foot{font-size:11px;color:var(--txt-dim);padding:9px 13px;border-top:1px dashed var(--line);text-align:center}
+.rules-foot a{color:var(--sadu);font-weight:700}
+@media (max-width:430px){.rules-cols{grid-template-columns:1fr}.rules-col.ok{border-left:none;border-bottom:1px dashed var(--line)}}
 .cap-row{display:flex;gap:10px;margin-bottom:14px}
 .cap-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 10px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;transition:.15s}
 .cap-btn b{font-size:14px}
