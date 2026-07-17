@@ -89,7 +89,13 @@ async function addPhoto(){
     toast('نُشرت صورتك 🎉');
     await loadPhotos();go('feed');setSort('new');
   }catch(e){
-    toast(e.message&&e.message.includes('row-level')?'وصلت حد النشر اليومي (10 صور) — كمّل بكرة 🌙':'تعذر النشر: '+(e.message||''),true);
+    if(e.message&&e.message.includes('row-level')){
+      // نسأل القاعدة عن السبب الحقيقي
+      const [ban,lim]=await Promise.all([sb.rpc('am_i_banned'),sb.rpc('my_uploads_today')]);
+      if(ban.data===true)toast('حسابك محظور من النشر — راسل الإدارة من صفحة حسابي ⛔',true);
+      else if((lim.data??0)>=10)toast('وصلت حد النشر اليومي (10 صور) — كمّل بكرة 🌙',true);
+      else toast('تعذر النشر — تأكد أنك مسجل دخول',true);
+    }else toast('تعذر النشر: '+(e.message||''),true);
   }finally{
     btn.disabled=false;btn.textContent='انشر الصورة 🚀';
   }
