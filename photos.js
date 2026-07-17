@@ -14,7 +14,12 @@ function topBadge(p){
 }
 
 /* ============ الحالة ============ */
-let photos=[], sortMode='top', curId=null, curPhoto=null;
+let photos=[], sortMode='top', curId=null, curPhoto=null, catFilter='all';
+function setCat(k){
+  catFilter=k;
+  document.querySelectorAll('.cat-chip').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  render();
+}
 let myRating=0, myBadgeSet=new Set();
 const $=id=>document.getElementById(id);
 /* تعقيم النصوص — يمنع حقن أي كود في الصفحة */
@@ -75,7 +80,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م8`;
+  $('totalPill').textContent=`${photos.length} صورة · م9`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
