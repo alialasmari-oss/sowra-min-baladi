@@ -1,6 +1,15 @@
 /* صورة من بلدي — upload.js | نسخة المختبر م1 */
 /* ============ الإضافة ============ */
-let pendingFile=null,pendingGeo=null,pendingBlob=null;
+let pendingFile=null,pendingGeo=null,pendingBlob=null,isAbroad=false;
+function setDest(abroad){
+  isAbroad=abroad;
+  $('destHome').classList.toggle('on-dest',!abroad);
+  $('destAbroad').classList.toggle('on-dest',abroad);
+  $('abroadForm').style.display=abroad?'block':'none';
+  $('grpRegion').style.display=abroad?'none':'block';
+  $('grpCity').style.display=abroad?'none':'block';
+  $('grpVillage').style.display=abroad?'none':'block';
+}
 function applyGeo(pos,source){
   const card=$('geoCard');card.style.display='block';
   if(!pos){
@@ -12,8 +21,13 @@ function applyGeo(pos,source){
     return;
   }
   card.classList.remove('warn');
-  const n=nearestCity(pos.lat,pos.lng);
   pendingGeo={lat:pos.lat,lng:pos.lng};
+  if(isAbroad){
+    $('geoStatus').textContent='📡 تم التقاط إحداثيات موقعك'+(pos.acc?` · دقة ±${pos.acc}م`:'');
+    $('geoCoords').textContent=`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`;
+    return;
+  }
+  const n=nearestCity(pos.lat,pos.lng);
   $('aRegion').value=n.region;fillAddCities();$('aCity').value=n.city;
   $('geoStatus').textContent=`📡 تم تحديد الموقع تلقائياً: قرب ${n.city} (≈${n.km} كم)`+(pos.acc?` · دقة ±${pos.acc}م`:'');
   $('geoCoords').textContent=`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`;
@@ -62,12 +76,18 @@ function thumbUrl(p){return imgUrl(thumbPath(p))}
 
 async function addPhoto(){
   if(!USER || USER.is_anonymous){toast('سجّل أول عشان تنشر 📸');openAcc();return}
-  const title=$('aTitle').value.trim(),region=$('aRegion').value,city=$('aCity').value;
+  const title=$('aTitle').value.trim();
+  let region=$('aRegion').value,city=$('aCity').value,country='';
+  if(isAbroad){
+    country=$('aCountry').value.trim();
+    if(country.length<2){toast('اكتب الدولة والمدينة 🌍',true);return}
+    region='عدسة مسافر';city=country;
+  }
   if(!pendingFile)return toast('اختر صورة أول ⚠️',true);
   if(!title)return toast('اكتب عنوان للصورة ⚠️',true);
   if(title.length<2)return toast('العنوان قصير — حرفان على الأقل ✏️',true);
   if(title.length>100)return toast('العنوان طويل — 100 حرف كحد أقصى ✏️',true);
-  if(!region||!city)return toast('حدد المنطقة والمدينة ⚠️',true);
+  if(!isAbroad&&(!region||!city))return toast('حدد المنطقة والمدينة ⚠️',true);
   const btn=$('pubBtn');btn.disabled=true;btn.textContent='⏳ جاري الرفع...';
   try{
     const blob=pendingBlob||await compress(pendingFile);
@@ -80,7 +100,8 @@ async function addPhoto(){
     if(up.error)throw up.error;
     const ins=await sb.from('photos').insert({
       user_id:USER.id,title,region,city,
-      village:$('aVillage').value.trim(),
+      abroad:isAbroad,country,
+      village:isAbroad?'':$('aVillage').value.trim(),
       lat:pendingGeo?.lat??null,lng:pendingGeo?.lng??null,
       image_path:path
     });
@@ -93,7 +114,9 @@ async function addPhoto(){
     $('preview').style.display='none';$('drop').style.display='none';$('geoCard').style.display='none';
     $('aTitle').value='';$('aVillage').value='';
     toast('نُشرت صورتك 🎉');
-    await loadPhotos();go('feed');setSort('new');
+    const wasAbroad=isAbroad;
+    $('aCountry').value='';
+    await loadPhotos();go('feed');setSort(wasAbroad?'abroad':'new');
   }catch(e){
     if(e.message&&e.message.includes('row-level')){
       // نسأل القاعدة عن السبب الحقيقي
