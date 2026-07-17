@@ -1,0 +1,198 @@
+async function openAdmin(){
+  go('adm');
+  $('admList').innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
+  const [ph,rp]=await Promise.all([
+    sb.from('photos').select('*, profiles!user_id(display_name, banned)').order('created_at',{ascending:false}),
+    sb.from('reports').select('photo_id')
+  ]);
+  if(ph.error){$('admList').innerHTML=`<div class="empty">⚠️ خطأ في جلب الصور:<br><span style="direction:ltr;display:inline-block;color:var(--sadu);font-size:12px">${ph.error.message}</span></div>`;return}
+  if(rp.error){$('admList').innerHTML=`<div class="empty">⚠️ خطأ في جلب البلاغات:<br><span style="direction:ltr;display:inline-block;color:var(--sadu);font-size:12px">${rp.error.message}</span></div>`;return}
+  admPhotos=ph.data||[];
+  admReps={};
+  (rp.data||[]).forEach(r=>admReps[r.photo_id]=(admReps[r.photo_id]||0)+1);
+  admSetTab(admTab);
+}
+function admSetTab(t){
+  admTab=t;
+  ['Rep','All','Plc','Fb','St'].forEach(x=>$('admTab'+x).classList.remove('on'));
+  $('admTab'+({rep:'Rep',all:'All',plc:'Plc',fb:'Fb',st:'St'}[t])).classList.add('on');
+  $('admPlaces').style.display=t==='plc'?'block':'none';
+  $('admFb').style.display=t==='fb'?'block':'none';
+  $('admSt').style.display=t==='st'?'block':'none';
+  $('admList').style.display=(t==='rep'||t==='all')?'block':'none';
+  if(t==='plc')renderPlaces();
+  else if(t==='fb')loadFb();
+  else if(t==='st')loadStats();
+  else admRender();
+}
+
+/* ====== الإحصائيات ====== */
+async function loadStats(){
+  $('admSt').innerHTML='<div class="empty">⏳</div>';
+  const [st,us]=await Promise.all([sb.rpc('admin_stats'),sb.rpc('admin_users')]);
+  if(st.error||!st.data){$('admSt').innerHTML=`<div class="empty">⚠️ ${st.error?.message||'نفّذ سكربت v7 أول'}</div>`;return}
+  const s=st.data;
+  const card=(n,l,ic)=>`<div style="background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center">
+    <div style="font-size:22px">${ic}</div>
+    <div style="font-size:24px;font-weight:700;color:var(--sand)">${n}</div>
+    <div style="font-size:11px;color:var(--txt-dim)">${l}</div></div>`;
+  let html=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+    ${card(s.users,'مسجلين','👤')}${card(s.guests,'زوار','👀')}${card(s.photos,'صورة','📸')}
+    ${card(s.ratings,'تقييم','⭐')}${card(s.comments,'تعليق','💬')}${card(s.badges,'صوت وسام','🗳️')}
+    ${card(s.fb_new,'رسالة جديدة','📨')}${card(s.hidden,'مخفية','🙈')}${card(s.places,'مكان مضاف','📍')}
+  </div>
+  <div style="font-weight:700;font-size:15px;margin-bottom:10px">👥 المسجلون (${(us.data||[]).length})</div>`;
+  html+=(us.data||[]).length
+    ?(us.data.map(u=>`<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div style="min-width:0">
+          <b style="font-size:14px">${esc(u.display_name)}</b>
+          <div style="font-size:11.5px;color:var(--txt-dim);direction:ltr;text-align:right;overflow:hidden;text-overflow:ellipsis">${esc(u.email)}</div>
+        </div>
+        <div style="text-align:center;flex:0 0 auto">
+          <div style="font-size:15px;font-weight:700;color:var(--sand)">${u.photos_count} 📸</div>
+          <div style="font-size:10px;color:var(--txt-dim)">${new Date(u.created_at).toLocaleDateString('ar-SA')}</div>
+        </div>
+      </div>`).join(''))
+    :'<div class="empty">ما فيه مسجلين بعد</div>';
+  $('admSt').innerHTML=html;
+}
+
+/* صورة من بلدي — admin.js | نسخة المختبر م1 */
+const KIND_AR={city:'مدينة',village:'قرية',landmark:'معلم'};
+/* ====== مراسلة الإدارة ====== */
+const FB_AR={suggestion:'💡 اقتراح',complaint:'⚠️ شكوى',question:'❓ استفسار',other:'📝 أخرى'};
+async function sendFeedback(){
+  const kind=$('fbKind').value,body=$('fbBody').value.trim();
+  if(body.length<3)return toast('اكتب رسالتك أول',true);
+  const b=$('fbGo');b.disabled=true;b.textContent='⏳';
+  const { error } = await sb.from('feedback').insert({user_id:USER.id,kind,body});
+  b.disabled=false;b.textContent='إرسال 📨';
+  if(error){toast('تعذر الإرسال: '+error.message,true);return}
+  $('fbBody').value='';
+  toast('وصلت رسالتك للإدارة، شكراً لك 🙏');
+}
+async function loadFb(){
+  $('admFb').innerHTML='<div class="empty">⏳</div>';
+  const { data, error } = await sb.from('feedback').select('*, profiles!user_id(display_name)').order('created_at',{ascending:false});
+  if(error){$('admFb').innerHTML=`<div class="empty">⚠️ ${error.message}</div>`;return}
+  if(!data.length){$('admFb').innerHTML='<div class="empty">📭 ما فيه رسائل بعد</div>';return}
+  $('admFb').innerHTML=data.map(f=>`
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px;${f.status==='done'?'opacity:.55':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--card2);border:1px solid var(--line)">${FB_AR[f.kind]||f.kind}</span>
+        <span style="font-size:11px;color:var(--txt-dim)">${esc(f.profiles?.display_name||'زائر')} · ${new Date(f.created_at).toLocaleDateString('ar-SA')}</span>
+      </div>
+      <div style="font-size:14px;line-height:1.8;margin-bottom:10px">${esc(f.body)}</div>
+      <div style="display:flex;gap:8px">
+        ${f.status==='new'
+          ?`<button class="btn" style="font-size:12px;padding:7px 14px;background:var(--palm)" onclick="fbDone(${f.id})">✓ تم التعامل</button>`
+          :`<span style="font-size:12px;color:var(--palm);font-weight:700;padding:7px 0">✓ منتهية</span>`}
+        <button class="btn" style="font-size:12px;padding:7px 14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="fbDel(${f.id})">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+async function fbDone(id){
+  const { error } = await sb.from('feedback').update({status:'done'}).eq('id',id);
+  if(error){toast('فشلت العملية',true);return}
+  loadFb();
+}
+async function fbDel(id){
+  if(!confirm('حذف الرسالة نهائياً؟'))return;
+  const { error } = await sb.from('feedback').delete().eq('id',id);
+  if(error){toast('فشل الحذف',true);return}
+  loadFb();
+}
+function plcFillCities(){
+  const r=$('plcRegion').value,c=$('plcCity');
+  c.innerHTML='<option value="">المدينة (اختياري)</option>';
+  if(r&&GEO[r])GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
+}
+function renderPlaces(){
+  const reg=$('plcRegion'),sel=reg.value;
+  reg.innerHTML='<option value="">اختر المنطقة</option>';
+  for(const r in BASE_GEO)reg.innerHTML+=`<option>${r}</option>`;
+  if(sel)reg.value=sel;
+  plcFillCities();
+  $('plcList').innerHTML=customPlaces.length
+    ?customPlaces.map(c=>`
+      <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
+        <div style="flex:1">
+          <b style="font-size:14px">${esc(c.name)}</b>
+          <div style="font-size:11px;color:var(--txt-dim)">${KIND_AR[c.kind]}${c.city?' · '+esc(c.city):''} · ${esc(c.region)}</div>
+        </div>
+        <button class="btn" style="font-size:12px;padding:7px 12px" onclick="admDelPlace(${c.id},'${esc(c.name).replace(/'/g,"\\'")}')">🗑️ حذف</button>
+      </div>`).join('')
+    :`<div class="empty">ما فيه أماكن مضافة بعد — كل اللي تضيفه هنا يظهر فوراً بقوائم التطبيق</div>`;
+}
+async function admAddPlace(){
+  const region=$('plcRegion').value,city=$('plcCity').value,name=$('plcName').value.trim(),kind=$('plcKind').value;
+  if(!region)return toast('اختر المنطقة',true);
+  if(name.length<2)return toast('اكتب اسم المكان',true);
+  const { error } = await sb.from('custom_places').insert({region,city,name,kind});
+  if(error){
+    toast(error.code==='23505'?'المكان مضاف من قبل':'تعذرت الإضافة: '+error.message,true);
+    return;
+  }
+  $('plcName').value='';
+  toast('انضاف المكان ✅');
+  await loadPlaces();renderPlaces();
+}
+async function admDelPlace(id,name){
+  if(!confirm(`حذف «${name}» من القوائم؟ (الصور المنشورة عليه ما تتأثر)`))return;
+  const { error } = await sb.from('custom_places').delete().eq('id',id);
+  if(error){toast('تعذر الحذف',true);return}
+  toast('انحذف المكان');
+  await loadPlaces();renderPlaces();
+}
+function admRender(){
+  let list=admTab==='rep'?admPhotos.filter(p=>(admReps[p.id]||0)>0||p.hidden):admPhotos;
+  if(!list.length){$('admList').innerHTML=`<div class="empty">${admTab==='rep'?'✅ ما فيه بلاغات — الساحة نظيفة':'ما فيه صور'}</div>`;return}
+  $('admList').innerHTML=list.map(p=>{
+    const rc=admReps[p.id]||0;
+    return `<div class="card" style="margin-bottom:12px;cursor:default">
+      <div class="ph" style="height:150px"><img src="${imgUrl(p.image_path)}" loading="lazy"></div>
+      <div class="card-body">
+        <div class="card-title">${esc(p.title)}</div>
+        <div class="card-meta" style="margin-bottom:8px"><span>📷 ${p.profiles?.display_name||'?'} · 📍 ${p.city}</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          ${rc?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(242,179,61,.15);color:var(--star);border:1px solid var(--star)">🚩 ${rc} بلاغ</span>`:''}
+          ${p.hidden?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.15);color:var(--sadu);border:1px solid var(--sadu)">مخفية</span>`:''}
+          ${p.profiles?.banned?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(192,57,43,.3);color:#fff;border:1px solid var(--sadu)">صاحبها محظور</span>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" style="font-size:12px;padding:8px 12px;${p.hidden?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px" onclick="admDel(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px;${p.profiles?.banned?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
+          ${rc?`<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line)" onclick="admClear(${p.id})">مسح البلاغات</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function admHide(id,hide){
+  const { error } = await sb.from('photos').update({hidden:hide}).eq('id',id);
+  if(error){toast('فشلت العملية',true);return}
+  toast(hide?'أُخفيت الصورة':'أُظهرت الصورة');
+  await openAdmin();await loadPhotos();
+}
+async function admDel(id,path){
+  if(!confirm('حذف نهائي؟ لا يمكن التراجع.'))return;
+  const { error } = await sb.from('photos').delete().eq('id',id);
+  if(error){toast('فشل الحذف',true);return}
+  await sb.storage.from('photos').remove([path]);
+  toast('حُذفت الصورة نهائياً');
+  await openAdmin();await loadPhotos();
+}
+async function admBan(uid,ban){
+  if(ban&&!confirm('حظر المصور؟ لن يستطيع النشر أو التعليق.'))return;
+  const { error } = await sb.from('profiles').update({banned:ban}).eq('id',uid);
+  if(error){toast('فشلت العملية',true);return}
+  toast(ban?'تم حظر المصور ⛔':'فُك الحظر');
+  await openAdmin();
+}
+async function admClear(id){
+  const { error } = await sb.from('reports').delete().eq('photo_id',id);
+  if(error){toast('فشلت العملية',true);return}
+  toast('مُسحت البلاغات');
+  await openAdmin();
+}
