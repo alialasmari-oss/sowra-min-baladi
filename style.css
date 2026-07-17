@@ -137,6 +137,7 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .cap-btn small{font-size:11px;color:var(--txt-dim);font-weight:400}
 .cap-btn.live{border-color:var(--sadu);background:linear-gradient(160deg,var(--card),rgba(214,58,47,.08))}
 .cap-btn:active{transform:scale(.96)}
+.cap-btn.on-dest{border-color:var(--qblue);background:linear-gradient(160deg,var(--card),rgba(46,111,183,.10));box-shadow:0 0 0 1.5px var(--qblue) inset}
 .geo-card{background:var(--card);border:1px solid var(--palm);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13px}
 .geo-card.warn{border-color:var(--star)}
 .geo-status{font-weight:700;color:var(--palm);margin-bottom:3px}
