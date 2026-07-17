@@ -65,6 +65,8 @@ async function addPhoto(){
   const title=$('aTitle').value.trim(),region=$('aRegion').value,city=$('aCity').value;
   if(!pendingFile)return toast('اختر صورة أول ⚠️',true);
   if(!title)return toast('اكتب عنوان للصورة ⚠️',true);
+  if(title.length<2)return toast('العنوان قصير — حرفان على الأقل ✏️',true);
+  if(title.length>100)return toast('العنوان طويل — 100 حرف كحد أقصى ✏️',true);
   if(!region||!city)return toast('حدد المنطقة والمدينة ⚠️',true);
   const btn=$('pubBtn');btn.disabled=true;btn.textContent='⏳ جاري الرفع...';
   try{
@@ -82,7 +84,11 @@ async function addPhoto(){
       lat:pendingGeo?.lat??null,lng:pendingGeo?.lng??null,
       image_path:path
     });
-    if(ins.error)throw ins.error;
+    if(ins.error){
+      // فشل التسجيل — ننظف ملفات الصورة من المخزن حتى لا تبقى يتيمة
+      await sb.storage.from('photos').remove([path,thumbPath(path)]).catch(()=>{});
+      throw ins.error;
+    }
     pendingFile=null;pendingGeo=null;pendingBlob=null;
     $('preview').style.display='none';$('drop').style.display='none';$('geoCard').style.display='none';
     $('aTitle').value='';$('aVillage').value='';
@@ -95,6 +101,8 @@ async function addPhoto(){
       if(ban.data===true)toast('حسابك محظور من النشر — راسل الإدارة من صفحة حسابي ⛔',true);
       else if((lim.data??0)>=10)toast('وصلت حد النشر اليومي (10 صور) — كمّل بكرة 🌙',true);
       else toast('تعذر النشر — تأكد أنك مسجل دخول',true);
+    }else if(e.message&&e.message.includes('check constraint')){
+      toast('تأكد من البيانات: العنوان 2–100 حرف ✏️',true);
     }else toast('تعذر النشر: '+(e.message||''),true);
   }finally{
     btn.disabled=false;btn.textContent='انشر الصورة 🚀';
