@@ -253,6 +253,7 @@ async function admSpBlock(){
       <button class="btn" style="flex:1" onclick="$('spFile').click()">📤 ${b.image_path?'تغيير الصورة':'رفع صورة البنر'}</button>
       <button class="btn" style="flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admSpSaveLink()">💾 حفظ الرابط</button>
       ${b.image_path?`<button class="btn" style="flex:1;${b.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admSpToggle()">${b.active?'🙈 إخفاء':'👁️ تفعيل'}</button>`:''}
+      ${b.image_path?`<button class="btn" style="flex:0 0 auto;background:var(--sadu)" onclick="admSpDelete()">🗑️ حذف</button>`:''}
     </div>
   </div>`;
 }
@@ -323,4 +324,14 @@ async function admWeekNew(){
   if(error){toast('تعذر الإنشاء',true);return}
   toast('مسابقة جديدة جاهزة للتجهيز ✨');
   await loadAdmWeek();
+}
+
+async function admSpDelete(){
+  const b=window.__SPB;
+  if(!confirm('حذف بنر الراعي نهائياً؟ الصورة تنمسح من المخزن والإعدادات تتصفّر.'))return;
+  if(b.image_path)await sb.storage.from('photos').remove([b.image_path]).catch(()=>{});
+  const {error}=await sb.from('site_banner').update({active:false,image_path:'',link_url:''}).eq('id',1);
+  if(error){toast('فشل الحذف',true);return}
+  toast('انحذف البنر نهائياً 🗑️');
+  await loadAdmWeek();loadSponsor();
 }
