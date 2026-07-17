@@ -219,13 +219,15 @@ async function loadAdmWeek(){
   }
   $('admWk').innerHTML=`
     <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
-      <div style="font-weight:700;font-size:14px;margin-bottom:10px">🏆 مسابقة لقطة الأسبوع ${CW?`<span style="font-size:11px;padding:3px 10px;border-radius:10px;font-weight:700;${CW.active?'background:rgba(46,139,87,.15);color:var(--palm);border:1px solid var(--palm)':'background:var(--card2);color:var(--txt-dim);border:1px solid var(--line)'}">${CW.active?'● نشطة الآن':'○ متوقفة'}</span>`:''}</div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">🏆 مسابقة لقطة الأسبوع ${CW?`<span style="font-size:11px;padding:3px 10px;border-radius:10px;font-weight:700;${CW.active?'background:rgba(46,139,87,.15);color:var(--palm);border:1px solid var(--palm)':'background:var(--card2);color:var(--txt-dim);border:1px solid var(--line)'}">${CW.ended_at?'🏁 منتهية — الفائز أُعلن':(CW.active?'● نشطة الآن':'○ متوقفة')}</span>`:''}</div>
       <input id="wkLabel" placeholder="وسم الأسبوع (مثال: أسبوع الغروب)" value="${CW?esc(CW.week_label):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:8px">
       <input id="wkSponsor" placeholder="اسم الراعي (اختياري)" value="${CW?esc(CW.sponsor_name):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:8px">
       <input id="wkPrize" placeholder="الجائزة (اختياري)" value="${CW?esc(CW.prize):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px">
-      <div style="display:flex;gap:8px">
-        <button class="btn" style="flex:1" onclick="admWeekSave()">${CW?'💾 حفظ البيانات':'➕ إنشاء المسابقة'}</button>
-        ${CW?`<button class="btn" style="flex:1;${CW.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admWeekToggle()">${CW.active?'⏸️ إيقاف':'▶️ تفعيل للجمهور'}</button>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${CW&&CW.ended_at?'':'<button class="btn" style="flex:1" onclick="admWeekSave()">'+(CW?'💾 حفظ البيانات':'➕ إنشاء المسابقة')+'</button>'}
+        ${CW&&!CW.ended_at?`<button class="btn" style="flex:1;${CW.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admWeekToggle()">${CW.active?'⏸️ إيقاف':'▶️ تفعيل للجمهور'}</button>`:''}
+        ${CW&&CW.active?`<button class="btn" style="flex:1;background:var(--star);color:var(--ink)" onclick="admWeekEnd()">🏁 إنهاء وإعلان الفائز</button>`:''}
+        ${CW&&CW.ended_at?`<button class="btn" style="flex:1;background:var(--palm)" onclick="admWeekNew()">➕ مسابقة جديدة</button>`:''}
       </div>
     </div>
     <div style="font-weight:700;font-size:14px;margin-bottom:8px">اللقطات المرشحة (${entries.length}/5) <span style="font-size:11px;color:var(--txt-dim);font-weight:400">— رشّح من تبويب 🗂️ بزر 🏆</span></div>
@@ -250,6 +252,7 @@ async function admWeekToggle(){
 }
 async function admWeekAdd(pid){
   if(!CW){toast('أنشئ المسابقة أول من تبويب 🏆',true);return}
+  if(CW.ended_at){toast('المسابقة منتهية — أنشئ جديدة من تبويب 🏆',true);return}
   const en=await sb.from('weekly_entries').select('photo_id').eq('contest_id',CW.id);
   if((en.data||[]).length>=5){toast('اكتمل العدد — 5 لقطات كحد أقصى',true);return}
   const {error}=await sb.from('weekly_entries').insert({contest_id:CW.id,photo_id:pid});
@@ -259,4 +262,21 @@ async function admWeekAdd(pid){
 async function admWeekRemove(pid){
   await sb.from('weekly_entries').delete().eq('contest_id',CW.id).eq('photo_id',pid);
   toast('أُزيلت');await loadAdmWeek();
+}
+
+async function admWeekEnd(){
+  const bd=await sb.from('weekly_board').select('*').eq('contest_id',CW.id);
+  let win=null,mx=0;(bd.data||[]).forEach(r=>{if(r.votes>mx){mx=r.votes;win=r.photo_id}});
+  if(!win){if(!confirm('ما فيه أصوات بعد — إنهاء المسابقة بدون فائز؟'))return}
+  else if(!confirm('إنهاء المسابقة وإعلان الفائز؟ يظهر التتويج بالرئيسية لمدة أسبوع.'))return;
+  const {error}=await sb.from('weekly_contest').update({active:false,ended_at:new Date().toISOString(),winner_photo_id:win}).eq('id',CW.id);
+  if(error){toast('فشل الإنهاء: '+error.message,true);return}
+  toast(win?'أُعلن الفائز — مبروك للمتوّج 👑':'أُنهيت المسابقة');
+  await loadAdmWeek();await loadWeek();
+}
+async function admWeekNew(){
+  const {error}=await sb.from('weekly_contest').insert({active:false});
+  if(error){toast('تعذر الإنشاء',true);return}
+  toast('مسابقة جديدة جاهزة للتجهيز ✨');
+  await loadAdmWeek();
 }

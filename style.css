@@ -173,3 +173,12 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .fbtn.on{background:var(--palm);border-color:var(--palm);color:#fff}
 /* ====== زر الخريطة ====== */
 .mapbtn{display:inline-block;margin-top:6px;background:var(--card);border:1.5px solid var(--palm);color:var(--palm);border-radius:12px;padding:6px 13px;font-size:12px;font-weight:700;text-decoration:none}
+
+/* ====== رتب الأعضاء ====== */
+.rankchip{font-size:11px;font-weight:700;padding:4px 11px;border-radius:12px;border:1.5px solid}
+.rankchip.r-bronze{background:#F3EDE2;color:#8A6E4E;border-color:#C9B28C}
+.rankchip.r-silver{background:#EEF3F7;color:#2E6FB7;border-color:#9CBBDB}
+.rankchip.r-gold{background:#FFF4D6;color:#A87500;border-color:var(--star)}
+/* ====== الفائز ====== */
+.wcard.winner{border:2.5px solid var(--star);box-shadow:0 0 0 3px rgba(232,160,32,.25),0 4px 14px rgba(232,160,32,.3)}
+.week-strip.win{background:linear-gradient(135deg,#FFF4D6,#FFFDF5);border-color:var(--star)}

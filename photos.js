@@ -74,7 +74,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م6`;
+  $('totalPill').textContent=`${photos.length} صورة · م7`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -90,7 +90,7 @@ function render(){
         <div class="card-title">${esc(p.title)}</div>
         <div class="card-meta">
           <span class="stars-mini">${starsTxt(p.avg_stars)} (${p.ratings_count})</span>
-          <span class="who">📷 ${esc(p.photographer)}</span>
+          <span class="who">${rankOf(p).ic} ${esc(p.photographer)}</span>
         </div>
       </div>
     </div>`;
@@ -106,7 +106,8 @@ async function openSheet(id){
   $('sPh').classList.remove('full');
   $('sTitle').textContent=p.title;
   $('sLoc').innerHTML=(p.abroad?`🌍 عدسة مسافر · ${esc(p.country||p.city)} — عدسة ${esc(p.photographer)}`:`📍 ${esc(p.region)} · ${esc(p.city)}${p.village?' · '+esc(p.village):''} — عدسة ${esc(p.photographer)}`)
-    +(p.lat?`<br><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="color:var(--palm);text-decoration:none">🗺️ الموقع الدقيق على الخريطة</a>`:'');
+    +(p.lat?`<br><a class="mapbtn" href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank">🗺️ افتح الموقع على قوقل ماب</a>`:'');
+  renderFollow(p);
   $('overlay').classList.add('show');
   document.body.style.overflow='hidden';
   // تقييمي وأوسمتي وتعليقات — من القاعدة
@@ -124,6 +125,12 @@ async function openSheet(id){
   $('thanks').style.display=myRating?'block':'none';
   drawStars();renderPoll();renderComments();
 }
+function rankOf(p){
+  const ph=p.photographer_photos||0, fo=p.followers_count||0;
+  if(ph>=15&&fo>=10)return{ic:'🏆',t:'عين الديرة',c:'gold'};
+  if(ph>=5||fo>=5)  return{ic:'📸',t:'عدسة الديرة',c:'silver'};
+  return{ic:'🌱',t:'مستكشف',c:'bronze'};
+}
 async function renderFollow(p){
   const el=$('sFollow');if(!el)return;
   const mine=USER&&p.user_id===USER.id;
@@ -132,7 +139,8 @@ async function renderFollow(p){
     const r=await sb.from('follows').select('follower_id').eq('follower_id',USER.id).eq('followed_id',p.user_id).maybeSingle();
     following=!!r.data;
   }
-  el.innerHTML=`<span class="fcount">👥 ${p.followers_count||0} متابع</span>`
+  const rk=rankOf(p);
+  el.innerHTML=`<span class="rankchip r-${rk.c}">${rk.ic} ${rk.t}</span><span class="fcount">👥 ${p.followers_count||0} متابع</span>`
     +(mine?'':`<button class="fbtn ${following?'on':''}" onclick="toggleFollow('${p.user_id}',${following})">${following?'✓ متابَع':'＋ متابعة'}</button>`);
 }
 async function toggleFollow(uid,isF){
