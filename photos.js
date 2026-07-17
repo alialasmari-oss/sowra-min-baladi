@@ -1,161 +1,201 @@
-:root{
-  --night:#F7F1E3;   /* خلفية كريمية — قماش القطّ */
-  --card:#FFFFFF;
-  --card2:#F1E8D6;
-  --sand:#8C2F23;    /* عناوين — أحمر قطّ عميق */
-  --sand-dim:#8A7B6A;
-  --sadu:#D63A2F;    /* الأحمر الرئيسي */
-  --sadu-deep:#A82A21;
-  --palm:#2E8B57;    /* أخضر القطّ */
-  --qblue:#2E6FB7;   /* أزرق القطّ */
-  --qteal:#2AA8A0;
-  --star:#E8A020;
-  --line:#D9CDB4;
-  --ink:#241F1C;     /* الخط الأسود المميز للقطّ */
-  --txt:#241F1C;
-  --txt-dim:#6B6259;
+/* صورة من بلدي — photos.js | نسخة المختبر م1 */
+/* ============ الأوسمة ============ */
+const BADGES = [
+  {k:'wall',  label:'📱 خلفية شاشة'},
+  {k:'mine',  label:'❤️ بحطها خلفية جوالي'},
+  {k:'global',label:'🌍 تدخل مسابقات عالمية'},
+  {k:'face',  label:'🇸🇦 واجهة تشرّف السعودية'},
+  {k:'print', label:'🖼️ تستاهل تنطبع لوحة'}
+];
+function topBadge(p){
+  const b=p.badge_counts||{};let best=null,bv=0;
+  for(const bd of BADGES)if((b[bd.k]||0)>bv){bv=b[bd.k];best=bd}
+  return bv>=2?best:null;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:'Tajawal',sans-serif;background:var(--night);color:var(--txt);max-width:1100px;margin:0 auto;padding:0 14px 190px;min-height:100vh}
-::-webkit-scrollbar{width:10px}
-::-webkit-scrollbar-track{background:var(--night)}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
-::-webkit-scrollbar-thumb:hover{background:var(--sand-dim)}
-html{scrollbar-color:var(--line) var(--night)}
-.sadu{
-  height:16px;
-  background-color:#F7F1E3;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='16' viewBox='0 0 128 16'%3E%3Crect width='128' height='16' fill='%23F7F1E3'/%3E%3Cpath d='M0 15 L16 2 L32 15 Z' fill='%23D63A2F' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M32 15 L48 2 L64 15 Z' fill='%232E6FB7' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M64 15 L80 2 L96 15 Z' fill='%23F2B33D' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M96 15 L112 2 L128 15 Z' fill='%232E8B57' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cline x1='0' y1='15.4' x2='128' y2='15.4' stroke='%23241F1C' stroke-width='1.4'/%3E%3C/svg%3E");
-  background-repeat:repeat-x;
-  background-size:128px 16px;
+
+/* ============ الحالة ============ */
+let photos=[], sortMode='top', curId=null, curPhoto=null;
+let myRating=0, myBadgeSet=new Set();
+const $=id=>document.getElementById(id);
+/* تعقيم النصوص — يمنع حقن أي كود في الصفحة */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const starsTxt=v=>{let f=Math.round(v);return "★".repeat(f)+"☆".repeat(5-f)};
+function toast(m,err){const t=$('toast');t.textContent=m;t.className='toast'+(err?' err':'');t.style.display='block';setTimeout(()=>t.style.display='none',2600)}
+function imgUrl(path){return sb.storage.from('photos').getPublicUrl(path).data.publicUrl}
+
+/* ============ تحميل الصور ============ */
+async function loadPhotos(){
+  const { data, error } = await sb.from('photos_ranked').select('*');
+  if(error){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${error.message}</div>`;return}
+  photos = data || [];
+  render();
 }
-header{padding:18px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:linear-gradient(var(--night) 78%,transparent)}
-.logo{font-family:'Reem Kufi',sans-serif;font-size:26px;font-weight:700;color:var(--sand);line-height:1}
-.logo span{font-size:13px;display:block;font-family:'Tajawal';font-weight:500;color:var(--txt-dim);margin-top:3px}
-.count-pill{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--sand-dim)}
-.filters{padding:6px 18px 14px;display:flex;flex-direction:column;gap:10px}
-/* ====== بنر التعريف ====== */
-.hero{
-  position:relative;margin:4px 18px 14px;padding:18px 18px 16px;
-  background:var(--card);border:1.5px solid var(--ink);border-radius:18px;
-  box-shadow:0 3px 10px rgba(36,31,28,.08);text-align:center;
+
+/* ============ الفلاتر والعرض ============ */
+function initSelects(){
+  const fr=$('fRegion'),ar=$('aRegion');
+  fr.innerHTML='<option value="">كل المناطق</option>';
+  ar.innerHTML='<option value="">اختر المنطقة</option>';
+  for(const r in GEO){fr.innerHTML+=`<option>${r}</option>`;ar.innerHTML+=`<option>${r}</option>`;}
 }
-.hero-x{position:absolute;top:10px;left:10px;width:28px;height:28px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--txt-dim);font-size:13px;cursor:pointer}
-.hero-title{font-family:'Reem Kufi',sans-serif;font-size:21px;color:var(--sand);margin-bottom:4px}
-.hero-sub{font-size:13px;color:var(--txt-dim);margin-bottom:14px;line-height:1.8}
-.hero-steps{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.hstep{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--txt)}
-.hstep span{font-size:22px;background:var(--card2);border:1px solid var(--line);border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
-.harrow{color:var(--sadu);font-weight:700;font-size:14px;margin-top:-14px}
-.hero-cta{padding:11px 26px;font-size:14px}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px}
-.search-box input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:'Tajawal';font-size:14px}
-.search-box input::placeholder{color:var(--txt-dim)}
-.sel-row{display:flex;gap:8px}
-select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;appearance:none}
-.sort-tabs{display:flex;gap:8px}
-.sort-tab{flex:1;text-align:center;padding:9px;border-radius:12px;font-size:13px;font-weight:500;background:var(--card);border:1px solid var(--line);color:var(--txt-dim);cursor:pointer;transition:.2s}
-.sort-tab.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
-.feed{padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.feed .empty,.feed .loader{grid-column:1/-1}
-.card{background:var(--card);border:1.5px solid var(--line);box-shadow:0 2px 8px rgba(36,31,28,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
-.card:hover{transform:translateY(-3px);border-color:var(--sand-dim)}
-.card:active{transform:scale(.97)}
-.ph{position:relative;height:150px;overflow:hidden;background:var(--card2)}
-.ph img{width:100%;height:100%;object-fit:cover;display:block}
-.medal{position:absolute;top:7px;right:7px;background:rgba(255,255,255,.9);border:1px solid var(--line);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--star);display:flex;align-items:center;gap:4px}
-.badge-tag{position:absolute;top:7px;left:7px;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:1px solid var(--sadu);border-radius:10px;padding:3px 7px;font-size:9.5px;color:var(--sand);font-weight:700;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.loc-chip{position:absolute;bottom:7px;right:7px;background:rgba(255,255,255,.9);border:1px solid var(--line);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:10.5px;color:var(--sand);max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-body{padding:9px 11px 11px}
-.card-title{font-size:13.5px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--txt-dim)}
-.card-meta .who{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-inline-start:6px}
-.stars-mini{color:var(--star);letter-spacing:.5px;font-size:11px;white-space:nowrap}
-.overlay{position:fixed;inset:0;background:rgba(36,31,28,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
-.overlay.show{display:flex}
-.sheet{position:relative;background:var(--night);width:100%;max-width:760px;max-height:92vh;border-radius:24px 24px 0 0;overflow-y:auto;border-top:2px solid var(--sadu);animation:up .25s ease}
-@keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
-.sheet .ph{height:45vh;min-height:240px;max-height:430px;border-radius:0;background:#000}
-.sheet .ph img{width:100%;height:100%;object-fit:cover}
-.zoombtn{position:absolute;bottom:10px;left:10px;z-index:6;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:12px;padding:7px 13px;font-family:'Tajawal';font-size:12px;font-weight:700;color:var(--txt);cursor:pointer}
-.close-x{z-index:30 !important;width:40px;height:40px;font-size:18px}
-.sheet .ph.full{height:auto;max-height:none}
-.sheet .ph.full img{height:auto;max-height:82vh;object-fit:contain}
-.sheet-body{padding:16px 20px 30px}
-.sheet-title{font-family:'Reem Kufi',sans-serif;font-size:22px;color:var(--sand)}
-.sheet-loc{color:var(--txt-dim);font-size:13px;margin:4px 0 14px;line-height:1.7}
-.rate-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;margin-bottom:16px}
-.rate-label{font-size:13px;color:var(--txt-dim);margin-bottom:8px}
-.big-stars{display:flex;justify-content:center;gap:10px;direction:ltr}
-.big-stars button{background:none;border:none;font-size:30px;color:var(--line);cursor:pointer;transition:.15s;padding:2px}
-.big-stars button.lit{color:var(--star)}
-.rate-avg{margin-top:10px;font-size:13px;color:var(--sand-dim)}
-.thanks{color:var(--palm);font-size:13px;margin-top:8px;display:none}
-.poll-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:16px}
-.poll-title{font-size:14px;font-weight:700;margin-bottom:10px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-size:12.5px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s}
-.chip .n{background:var(--night);border-radius:10px;padding:1px 7px;font-size:11px;color:var(--sand-dim)}
-.chip.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
-.chip.on .n{background:rgba(0,0,0,.25);color:#fff}
-.chip:active{transform:scale(.95)}
-.comments-h{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.comment{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px}
-.comment b{color:var(--sand);display:block;font-size:12px;margin-bottom:3px}
-.c-input{display:flex;gap:8px;margin-top:12px}
-.c-input input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';outline:none;font-size:13px}
-.btn{background:var(--sadu);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:'Tajawal';font-weight:700;font-size:14px;cursor:pointer}
-.btn:active{background:var(--sadu-deep)}
-.btn:disabled{opacity:.5}
-.close-x{position:sticky;top:10px;margin:10px 18px -40px auto;z-index:5;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--txt);border:1px solid var(--line);font-size:16px;cursor:pointer;display:block}
-.form{padding:6px 20px 160px}
-.form h2{font-family:'Reem Kufi',sans-serif;color:var(--sand);font-size:22px;margin-bottom:4px}
-.form p.hint{color:var(--txt-dim);font-size:13px;margin-bottom:18px}
-.f-group{margin-bottom:14px}
-.f-group label{display:block;font-size:13px;color:var(--sand-dim);margin-bottom:6px;font-weight:500}
-.f-group input,.f-group select,.f-group textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-family:'Tajawal';font-size:14px;outline:none}
-.f-group textarea{resize:vertical;min-height:90px}
-/* ====== ترويسة إرشادات النشر ====== */
-.rules{background:var(--card);border:1.5px solid var(--ink);border-radius:16px;padding:0;margin-bottom:18px;overflow:hidden}
-.rules summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:12px 14px;background:var(--card2);list-style:none;user-select:none}
-.rules summary::-webkit-details-marker{display:none}
-.rules[open] summary{border-bottom:1px solid var(--line)}
-.rules-cols{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.rules-col{padding:12px 13px;display:flex;flex-direction:column;gap:7px;font-size:12px;line-height:1.7}
-.rules-col b{font-size:13px;margin-bottom:2px}
-.rules-col.ok{border-left:1px dashed var(--line)}
-.rules-col.ok b{color:var(--palm)}
-.rules-col.no b{color:var(--sadu)}
-.rules-foot{font-size:11px;color:var(--txt-dim);padding:9px 13px;border-top:1px dashed var(--line);text-align:center}
-.rules-foot a{color:var(--sadu);font-weight:700}
-@media (max-width:430px){.rules-cols{grid-template-columns:1fr}.rules-col.ok{border-left:none;border-bottom:1px dashed var(--line)}}
-.cap-row{display:flex;gap:10px;margin-bottom:14px}
-.cap-btn{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 10px;color:var(--txt);font-family:'Tajawal';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:22px;transition:.15s}
-.cap-btn b{font-size:14px}
-.cap-btn small{font-size:11px;color:var(--txt-dim);font-weight:400}
-.cap-btn.live{border-color:var(--sadu);background:linear-gradient(160deg,var(--card),rgba(214,58,47,.08))}
-.cap-btn:active{transform:scale(.96)}
-.cap-btn.on-dest{border-color:var(--qblue);background:linear-gradient(160deg,var(--card),rgba(46,111,183,.10));box-shadow:0 0 0 1.5px var(--qblue) inset}
-.geo-card{background:var(--card);border:1px solid var(--palm);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13px}
-.geo-card.warn{border-color:var(--star)}
-.geo-status{font-weight:700;color:var(--palm);margin-bottom:3px}
-.geo-card.warn .geo-status{color:var(--star)}
-.geo-coords{color:var(--txt-dim);font-size:12px;direction:ltr;text-align:right}
-.drop{border:2px dashed var(--line);border-radius:18px;padding:20px;text-align:center;color:var(--txt-dim);margin-bottom:16px;background:var(--card)}
-.drop.has{border-color:var(--palm);color:var(--palm)}
-.drop img{max-width:100%;max-height:200px;border-radius:12px;margin-top:10px}
-.submit-btn{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:480px;z-index:35;padding:15px;font-size:16px;box-shadow:0 6px 20px rgba(214,58,47,.4)}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
-.nav-btn{flex:1;background:none;border:none;color:var(--txt-dim);font-family:'Tajawal';font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px}
-.nav-btn .ic{font-size:20px}
-.nav-btn.on{color:var(--sand)}
-.nav-btn.add-main{position:relative;top:-16px}
-.nav-btn.add-main .ic{width:52px;height:52px;border-radius:50%;background:var(--sadu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 14px rgba(214,58,47,.35)}
-.empty{text-align:center;padding:50px 30px;color:var(--txt-dim);font-size:14px;line-height:1.9}
-.empty .big{font-size:40px;display:block;margin-bottom:8px}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--palm);color:#fff;padding:11px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:99;display:none;white-space:nowrap}
-.toast.err{background:var(--sadu)}
-.loader{text-align:center;padding:40px;color:var(--txt-dim);font-size:14px}
-.page{display:none}.page.on{display:block}
+function fillCities(){
+  const r=$('fRegion').value,c=$('fCity');
+  c.innerHTML='<option value="">كل المدن</option>';
+  if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
+}
+function fillAddCities(){
+  const r=$('aRegion').value,c=$('aCity');
+  c.innerHTML='<option value="">اختر المدينة</option>';
+  if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
+  $('villList').innerHTML=(r&&VILL[r]?VILL[r]:[]).map(v=>`<option value="${v}">`).join('');
+}
+function setSort(m){
+  sortMode=m;
+  $('tabTop').classList.toggle('on',m==='top');
+  $('tabNew').classList.toggle('on',m==='new');
+  $('tabAbroad').classList.toggle('on',m==='abroad');
+  $('abroadHint').style.display=m==='abroad'?'block':'none';
+  render();
+}
+
+function render(){
+  const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
+  const abroadView=sortMode==='abroad';
+  let list=photos.filter(p=>!!p.abroad===abroadView);
+  if(abroadView){
+    list=list.filter(p=>!q||p.title.includes(q)||(p.country||'').includes(q));
+    list.sort((a,b)=>(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)||(new Date(b.created_at)-new Date(a.created_at)));
+  }else{
+    list=list.filter(p=>
+      (!r||p.region===r)&&(!c||p.city===c)&&
+      (!q||p.title.includes(q)||(p.village||'').includes(q)||p.city.includes(q)||p.region.includes(q))
+    );
+    list.sort((a,b)=>sortMode==='top'
+      ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
+      :new Date(b.created_at)-new Date(a.created_at));
+  }
+  $('totalPill').textContent=`${photos.length} صورة · م5`;
+  const feed=$('feed');
+  if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
+  feed.innerHTML=list.map((p,i)=>{
+    const medal=((sortMode==='top'||sortMode==='abroad')&&i<3&&p.ratings_count>0)?['🥇','🥈','🥉'][i]+' ':'';
+    const tb=topBadge(p);
+    return `<div class="card" onclick="openSheet(${p.id})">
+      <div class="ph"><img src="${thumbUrl(p.image_path)}" onerror="this.onerror=null;this.src='${imgUrl(p.image_path)}'" loading="lazy" alt="${esc(p.title)}">
+        <div class="medal">${medal}${Number(p.avg_stars).toFixed(1)} ★</div>
+        ${tb?`<div class="badge-tag">${tb.label}</div>`:''}
+        <div class="loc-chip">${p.abroad?'🌍 '+esc(p.country||p.city):'📍 '+esc(p.village||p.city)}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(p.title)}</div>
+        <div class="card-meta">
+          <span class="stars-mini">${starsTxt(p.avg_stars)} (${p.ratings_count})</span>
+          <span class="who">📷 ${esc(p.photographer)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ نافذة الصورة ============ */
+async function openSheet(id){
+  curId=id;curPhoto=photos.find(x=>x.id===id);
+  const p=curPhoto;
+  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${esc(p.title)}">
+    <button class="zoombtn" id="zoomBtn" onclick="togglePhotoZoom()">⤢ عرض كامل</button>`;
+  $('sPh').classList.remove('full');
+  $('sTitle').textContent=p.title;
+  $('sLoc').innerHTML=(p.abroad?`🌍 عدسة مسافر · ${esc(p.country||p.city)} — عدسة ${esc(p.photographer)}`:`📍 ${esc(p.region)} · ${esc(p.city)}${p.village?' · '+esc(p.village):''} — عدسة ${esc(p.photographer)}`)
+    +(p.lat?`<br><a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" style="color:var(--palm);text-decoration:none">🗺️ الموقع الدقيق على الخريطة</a>`:'');
+  $('overlay').classList.add('show');
+  document.body.style.overflow='hidden';
+  // تقييمي وأوسمتي وتعليقات — من القاعدة
+  myRating=0;myBadgeSet=new Set();
+  drawStars();renderPoll();
+  $('cList').innerHTML='<div class="loader" style="padding:10px">⏳</div>';
+  const [rt,bd,cm]=await Promise.all([
+    sb.from('ratings').select('stars').eq('photo_id',id).eq('user_id',USER.id).maybeSingle(),
+    sb.from('badge_votes').select('badge_key').eq('photo_id',id).eq('user_id',USER.id),
+    sb.from('comments').select('body,created_at,profiles!user_id(display_name)').eq('photo_id',id).order('created_at')
+  ]);
+  myRating=rt.data?rt.data.stars:0;
+  (bd.data||[]).forEach(x=>myBadgeSet.add(x.badge_key));
+  curPhoto._comments=(cm.data||[]);
+  $('thanks').style.display=myRating?'block':'none';
+  drawStars();renderPoll();renderComments();
+}
+function closeSheet(){$('overlay').classList.remove('show');document.body.style.overflow=''}
+function togglePhotoZoom(){
+  const full=$('sPh').classList.toggle('full');
+  $('zoomBtn').textContent=full?'⤡ تصغير':'⤢ عرض كامل';
+}
+
+function drawStars(){
+  $('bigStars').innerHTML=[1,2,3,4,5].map(n=>
+    `<button class="${n<=myRating?'lit':''}" onclick="rate(${n})">★</button>`).join('');
+  $('sAvg').textContent=`المتوسط ${Number(curPhoto.avg_stars).toFixed(1)} من 5 · ${curPhoto.ratings_count} تقييم`;
+}
+async function rate(n){
+  const prev=myRating;myRating=n;drawStars();
+  const { error } = await sb.from('ratings').upsert({photo_id:curId,user_id:USER.id,stars:n});
+  if(error){myRating=prev;drawStars();toast('تعذر حفظ التقييم',true);return}
+  $('thanks').style.display='block';
+  await refreshOne();
+}
+
+function renderPoll(){
+  const b=curPhoto.badge_counts||{};
+  $('pollChips').innerHTML=BADGES.map(bd=>
+    `<div class="chip ${myBadgeSet.has(bd.k)?'on':''}" onclick="voteBadge('${bd.k}')">${bd.label}<span class="n">${b[bd.k]||0}</span></div>`
+  ).join('');
+}
+async function voteBadge(k){
+  if(myBadgeSet.has(k)){
+    myBadgeSet.delete(k);renderPoll();
+    await sb.from('badge_votes').delete().eq('photo_id',curId).eq('user_id',USER.id).eq('badge_key',k);
+  }else{
+    myBadgeSet.add(k);renderPoll();
+    const { error } = await sb.from('badge_votes').insert({photo_id:curId,user_id:USER.id,badge_key:k});
+    if(error){myBadgeSet.delete(k);renderPoll();toast('تعذر التصويت',true);return}
+  }
+  await refreshOne();
+}
+
+function renderComments(){
+  const list=curPhoto._comments||[];
+  $('cCount').textContent=`(${list.length})`;
+  $('cList').innerHTML=list.length
+    ?list.map(c=>`<div class="comment"><b>${esc(c.profiles?.display_name||'زائر')}</b>${esc(c.body)}</div>`).join('')
+    :`<div style="color:var(--txt-dim);font-size:13px;padding:6px 2px">كن أول من يعلق ✍️</div>`;
+}
+async function reportPhoto(){
+  if(!confirm('هل أنت متأكد أن هذه الصورة مخالفة؟ البلاغات الكيدية قد تعرّض حسابك للحظر.'))return;
+  const { error } = await sb.from('reports').insert({photo_id:curId,user_id:USER.id});
+  if(error){
+    if(error.code==='23505')toast('سبق أن أبلغت عن هذه الصورة');
+    else toast('تعذر إرسال البلاغ',true);
+    return;
+  }
+  toast('وصل بلاغك، شكراً لحرصك 🙏');
+}
+
+async function addComment(){
+  if(!USER || USER.is_anonymous){toast('سجّل أول عشان تعلق ✍️');closeSheet();openAcc();return}
+  const t=$('cText').value.trim();if(!t)return;
+  const { error } = await sb.from('comments').insert({photo_id:curId,user_id:USER.id,body:t});
+  if(error){toast('تعذر إرسال التعليق',true);return}
+  $('cText').value='';
+  const cm=await sb.from('comments').select('body,created_at,profiles!user_id(display_name)').eq('photo_id',curId).order('created_at');
+  curPhoto._comments=cm.data||[];renderComments();
+}
+
+/* تحديث بيانات صورة واحدة من العرض المجمّع */
+async function refreshOne(){
+  const { data } = await sb.from('photos_ranked').select('*').eq('id',curId).single();
+  if(data){
+    const i=photos.findIndex(x=>x.id===curId);
+    if(i>-1)photos[i]={...data,_comments:curPhoto._comments};
+    curPhoto=photos[i];
+    drawStars();renderPoll();render();
+  }
+}
