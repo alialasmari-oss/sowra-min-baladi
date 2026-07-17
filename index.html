@@ -56,7 +56,9 @@
     <div class="sort-tabs">
       <div class="sort-tab on" id="tabTop" onclick="setSort('top')">⭐ الأعلى تقييماً</div>
       <div class="sort-tab" id="tabNew" onclick="setSort('new')">🕐 الأحدث</div>
+      <div class="sort-tab" id="tabAbroad" onclick="setSort('abroad')">🌍 عدسة مسافر</div>
     </div>
+    <div id="abroadHint" style="display:none;background:var(--card);border:1.5px dashed var(--qblue);border-radius:14px;padding:11px 14px;font-size:12.5px;color:var(--txt-dim);line-height:1.8;text-align:center">🌍 <b style="color:var(--qblue)">عدسة مسافر</b> — إذا كنت مسافراً خارج السعودية، نستقبل هنا لقطاتك من حول العالم بعيون أهل الديار. أما صور مناطق المملكة فمكانها الساحة الرئيسية 🇸🇦</div>
   </div>
   <div class="feed" id="feed"><div class="loader">⏳ نحمّل الصور...</div></div>
 </div>
@@ -87,6 +89,11 @@
       </div>
       <div class="rules-foot">المخالف يُحذف وقد يُحظر ناشره — التفاصيل في <a href="terms.html" target="_blank">الشروط والأحكام</a></div>
     </details>
+    <div class="cap-row" style="margin-bottom:10px">
+      <button class="cap-btn on-dest" id="destHome" onclick="setDest(false)">🇸🇦<b>من ديرتي</b><small>داخل المملكة</small></button>
+      <button class="cap-btn" id="destAbroad" onclick="setDest(true)">🌍<b>عدسة مسافر</b><small>خارج المملكة</small></button>
+    </div>
+    <div id="abroadForm" style="display:none" class="f-group"><label>الدولة والمدينة</label><input id="aCountry" placeholder="مثال: تركيا — إسطنبول"></div>
     <div class="cap-row">
       <button class="cap-btn live" onclick="document.getElementById('fileLive').click()">📸<b>التقط لايف</b><small>كاميرا + موقعك الآن</small></button>
       <button class="cap-btn" onclick="document.getElementById('fileGal').click()">🖼️<b>من المعرض</b><small>نقرأ موقع الصورة</small></button>
@@ -102,9 +109,9 @@
     <input type="file" id="fileLive" accept="image/*" capture="environment" style="display:none" onchange="pickImg(this,true)">
     <input type="file" id="fileGal" accept="image/*" style="display:none" onchange="pickImg(this,false)">
     <div class="f-group"><label>عنوان الصورة</label><input id="aTitle" placeholder="مثال: غروب على جبال السودة"></div>
-    <div class="f-group"><label>المنطقة</label><select id="aRegion" onchange="fillAddCities()"></select></div>
-    <div class="f-group"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
-    <div class="f-group"><label>القرية أو الحي (اختياري)</label><input id="aVillage" list="villList" placeholder="مثال: قرية رجال ألمع"><datalist id="villList"></datalist></div>
+    <div class="f-group" id="grpRegion"><label>المنطقة</label><select id="aRegion" onchange="fillAddCities()"></select></div>
+    <div class="f-group" id="grpCity"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
+    <div class="f-group" id="grpVillage"><label>القرية أو الحي (اختياري)</label><input id="aVillage" list="villList" placeholder="مثال: قرية رجال ألمع"><datalist id="villList"></datalist></div>
     <button class="btn submit-btn" id="pubBtn" onclick="addPhoto()">انشر الصورة 🚀</button>
     <div style="text-align:center;font-size:11.5px;color:var(--txt-dim);margin-top:2px">بنشرك الصورة تؤكد التزامك <a href="terms.html" target="_blank" style="color:var(--txt-dim);font-weight:700">بالشروط والتعهد</a></div>
   </div>
