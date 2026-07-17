@@ -235,8 +235,52 @@ async function loadAdmWeek(){
       <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
         <div style="flex:1"><b style="font-size:13px">#${p.id} · ${esc(p.title)}</b></div>
         <button class="btn" style="font-size:12px;padding:7px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admWeekRemove(${p.id})">إزالة</button>
-      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}`;
+      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock();
 }
+/* ====== بنر الراعي ====== */
+async function admSpBlock(){
+  const r=await sb.from('site_banner').select('*').eq('id',1).maybeSingle();
+  const b=r.data||{active:false,image_path:'',link_url:''};
+  window.__SPB=b;
+  return `
+  <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">📣 بنر الراعي (رأس الصفحة) ${b.active?'<span style="font-size:11px;color:var(--palm);font-weight:700">● ظاهر</span>':'<span style="font-size:11px;color:var(--txt-dim)">○ مخفي</span>'}</div>
+    <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px;line-height:1.8">📐 مقاس التصميم: <b>1600 × 400 بكسل</b> (نسبة 4:1) · JPG أو PNG · يفضل أقل من 300KB</div>
+    ${b.image_path?`<img src="${imgUrl(b.image_path)}" style="width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin-bottom:10px">`:''}
+    <input type="file" id="spFile" accept="image/*" style="display:none" onchange="admSpUpload(this.files[0])">
+    <input id="spLink" placeholder="رابط الراعي عند الضغط (اختياري)" value="${esc(b.link_url)}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px;direction:ltr;text-align:left">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" style="flex:1" onclick="$('spFile').click()">📤 ${b.image_path?'تغيير الصورة':'رفع صورة البنر'}</button>
+      <button class="btn" style="flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admSpSaveLink()">💾 حفظ الرابط</button>
+      ${b.image_path?`<button class="btn" style="flex:1;${b.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admSpToggle()">${b.active?'🙈 إخفاء':'👁️ تفعيل'}</button>`:''}
+    </div>
+  </div>`;
+}
+async function admSpUpload(f){
+  if(!f)return;
+  toast('⏳ جاري رفع البنر...');
+  const blob=await compressTo(f,1600,0.88);
+  const path=`banners/sponsor_${Date.now()}.jpg`;
+  const up=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});
+  if(up.error){toast('فشل الرفع: '+up.error.message,true);return}
+  const {error}=await sb.from('site_banner').update({image_path:path,updated_at:new Date().toISOString()}).eq('id',1);
+  if(error){toast('فشل الحفظ',true);return}
+  toast('ارتفع البنر ✅ — فعّله متى ما جهزت');
+  await loadAdmWeek();loadSponsor();
+}
+async function admSpSaveLink(){
+  const {error}=await sb.from('site_banner').update({link_url:$('spLink').value.trim()}).eq('id',1);
+  if(error){toast('فشل الحفظ',true);return}
+  toast('انحفظ الرابط ✅');loadSponsor();
+}
+async function admSpToggle(){
+  const b=window.__SPB;
+  const {error}=await sb.from('site_banner').update({active:!b.active}).eq('id',1);
+  if(error){toast('فشلت العملية',true);return}
+  toast(b.active?'اختفى البنر':'انطلق البنر برأس الصفحة 📣');
+  await loadAdmWeek();loadSponsor();
+}
+
 async function admWeekSave(){
   const data={week_label:$('wkLabel').value.trim(),sponsor_name:$('wkSponsor').value.trim(),prize:$('wkPrize').value.trim()};
   const q=CW?sb.from('weekly_contest').update(data).eq('id',CW.id):sb.from('weekly_contest').insert({...data,active:false});

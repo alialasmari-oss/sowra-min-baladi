@@ -21,7 +21,7 @@ function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$(
   // الدخول بالخلفية — والمحتوى العام يتحمل فوراً بالتوازي
   const authP=ensureAuth().then(()=>checkAdmin()).catch(e=>toast('تعذر الاتصال بالحساب',true));
   try{await Promise.all([loadPlaces(),loadPhotos()]);
-  loadWeek();}
+  loadWeek();loadSponsor();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}
   await authP;
 })();
