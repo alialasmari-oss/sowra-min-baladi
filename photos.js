@@ -74,7 +74,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م5`;
+  $('totalPill').textContent=`${photos.length} صورة · م6`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -123,6 +123,28 @@ async function openSheet(id){
   curPhoto._comments=(cm.data||[]);
   $('thanks').style.display=myRating?'block':'none';
   drawStars();renderPoll();renderComments();
+}
+async function renderFollow(p){
+  const el=$('sFollow');if(!el)return;
+  const mine=USER&&p.user_id===USER.id;
+  let following=false;
+  if(USER&&!USER.is_anonymous&&!mine){
+    const r=await sb.from('follows').select('follower_id').eq('follower_id',USER.id).eq('followed_id',p.user_id).maybeSingle();
+    following=!!r.data;
+  }
+  el.innerHTML=`<span class="fcount">👥 ${p.followers_count||0} متابع</span>`
+    +(mine?'':`<button class="fbtn ${following?'on':''}" onclick="toggleFollow('${p.user_id}',${following})">${following?'✓ متابَع':'＋ متابعة'}</button>`);
+}
+async function toggleFollow(uid,isF){
+  if(!USER||USER.is_anonymous){toast('سجّل أول عشان تتابع المصورين 👥');closeSheet();openAcc();return}
+  if(isF){await sb.from('follows').delete().eq('follower_id',USER.id).eq('followed_id',uid);}
+  else{
+    const{error}=await sb.from('follows').insert({follower_id:USER.id,followed_id:uid});
+    if(error){toast('تعذرت المتابعة',true);return}
+    toast('صرت متابعاً 👥');
+  }
+  await refreshOne();
+  renderFollow(curPhoto);
 }
 function closeSheet(){$('overlay').classList.remove('show');document.body.style.overflow=''}
 function togglePhotoZoom(){

@@ -63,7 +63,17 @@ function compressTo(file,maxW,quality){
       const scale=Math.min(1,maxW/Math.max(img.width,img.height));
       const cv=document.createElement('canvas');
       cv.width=Math.round(img.width*scale);cv.height=Math.round(img.height*scale);
-      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      const ctx=cv.getContext('2d');
+      ctx.drawImage(img,0,0,cv.width,cv.height);
+      // ختم المنصة المحفور
+      const fsz=Math.max(11,Math.round(cv.width*0.03));
+      ctx.font='bold '+fsz+'px Tajawal, Arial, sans-serif';
+      ctx.textBaseline='bottom';ctx.textAlign='left';
+      const pad=Math.round(fsz*0.7);
+      ctx.lineWidth=Math.max(2,fsz*0.14);ctx.lineJoin='round';
+      ctx.strokeStyle='rgba(36,31,28,.55)';ctx.fillStyle='rgba(255,255,255,.88)';
+      ctx.strokeText('sowra.app',pad,cv.height-pad);
+      ctx.fillText('sowra.app',pad,cv.height-pad);
       cv.toBlob(b=>resolve(b||file),'image/jpeg',quality);
     };
     img.onerror=()=>resolve(file);

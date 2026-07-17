@@ -14,15 +14,17 @@ async function openAdmin(){
 }
 function admSetTab(t){
   admTab=t;
-  ['Rep','All','Plc','Fb','St'].forEach(x=>$('admTab'+x).classList.remove('on'));
-  $('admTab'+({rep:'Rep',all:'All',plc:'Plc',fb:'Fb',st:'St'}[t])).classList.add('on');
+  ['Rep','All','Plc','Fb','St','Wk'].forEach(x=>$('admTab'+x).classList.remove('on'));
+  $('admTab'+({rep:'Rep',all:'All',plc:'Plc',fb:'Fb',st:'St',wk:'Wk'}[t])).classList.add('on');
   $('admPlaces').style.display=t==='plc'?'block':'none';
   $('admFb').style.display=t==='fb'?'block':'none';
   $('admSt').style.display=t==='st'?'block':'none';
+  $('admWk').style.display=t==='wk'?'block':'none';
   $('admList').style.display=(t==='rep'||t==='all')?'block':'none';
   if(t==='plc')renderPlaces();
   else if(t==='fb')loadFb();
   else if(t==='st')loadStats();
+  else if(t==='wk')loadAdmWeek();
   else admRender();
 }
 
@@ -152,7 +154,7 @@ function admRender(){
     return `<div class="card" style="margin-bottom:12px;cursor:default">
       <div class="ph" style="height:150px"><img src="${imgUrl(p.image_path)}" loading="lazy"></div>
       <div class="card-body">
-        <div class="card-title">${esc(p.title)}</div>
+        <div class="card-title">#${p.id} · ${esc(p.title)}</div>
         <div class="card-meta" style="margin-bottom:8px"><span>📷 ${p.profiles?.display_name||'?'} · 📍 ${p.city}</span></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
           ${rc?`<span style="font-size:11px;padding:3px 9px;border-radius:10px;font-weight:700;background:rgba(242,179,61,.15);color:var(--star);border:1px solid var(--star)">🚩 ${rc} بلاغ</span>`:''}
@@ -162,6 +164,7 @@ function admRender(){
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn" style="font-size:12px;padding:8px 12px;${p.hidden?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
           <button class="btn" style="font-size:12px;padding:8px 12px" onclick="admDel(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px;background:var(--star);color:var(--ink)" onclick="admWeekAdd(${p.id})">🏆 رشّح</button>
           <button class="btn" style="font-size:12px;padding:8px 12px;${p.profiles?.banned?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
           ${rc?`<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line)" onclick="admClear(${p.id})">مسح البلاغات</button>`:''}
         </div>
@@ -195,4 +198,65 @@ async function admClear(id){
   if(error){toast('فشلت العملية',true);return}
   toast('مُسحت البلاغات');
   await openAdmin();
+}
+
+
+/* ====== إدارة لقطة الأسبوع ====== */
+let CW=null;
+async function loadAdmWeek(){
+  $('admWk').innerHTML='<div class="empty">⏳</div>';
+  const c=await sb.from('weekly_contest').select('*').order('id',{ascending:false}).limit(1).maybeSingle();
+  CW=c.data||null;
+  let entries=[];
+  if(CW){
+    const en=await sb.from('weekly_entries').select('photo_id').eq('contest_id',CW.id);
+    const ids=(en.data||[]).map(e=>e.photo_id);
+    entries=admPhotos.filter(p=>ids.includes(p.id));
+    if(!admPhotos.length){
+      const ph=await sb.from('photos').select('id,title').in('id',ids.length?ids:[0]);
+      entries=ph.data||[];
+    }
+  }
+  $('admWk').innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:10px">🏆 مسابقة لقطة الأسبوع ${CW?`<span style="font-size:11px;padding:3px 10px;border-radius:10px;font-weight:700;${CW.active?'background:rgba(46,139,87,.15);color:var(--palm);border:1px solid var(--palm)':'background:var(--card2);color:var(--txt-dim);border:1px solid var(--line)'}">${CW.active?'● نشطة الآن':'○ متوقفة'}</span>`:''}</div>
+      <input id="wkLabel" placeholder="وسم الأسبوع (مثال: أسبوع الغروب)" value="${CW?esc(CW.week_label):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:8px">
+      <input id="wkSponsor" placeholder="اسم الراعي (اختياري)" value="${CW?esc(CW.sponsor_name):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:8px">
+      <input id="wkPrize" placeholder="الجائزة (اختياري)" value="${CW?esc(CW.prize):''}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px">
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="admWeekSave()">${CW?'💾 حفظ البيانات':'➕ إنشاء المسابقة'}</button>
+        ${CW?`<button class="btn" style="flex:1;${CW.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admWeekToggle()">${CW.active?'⏸️ إيقاف':'▶️ تفعيل للجمهور'}</button>`:''}
+      </div>
+    </div>
+    <div style="font-weight:700;font-size:14px;margin-bottom:8px">اللقطات المرشحة (${entries.length}/5) <span style="font-size:11px;color:var(--txt-dim);font-weight:400">— رشّح من تبويب 🗂️ بزر 🏆</span></div>
+    ${entries.length?entries.map(p=>`
+      <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
+        <div style="flex:1"><b style="font-size:13px">#${p.id} · ${esc(p.title)}</b></div>
+        <button class="btn" style="font-size:12px;padding:7px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admWeekRemove(${p.id})">إزالة</button>
+      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}`;
+}
+async function admWeekSave(){
+  const data={week_label:$('wkLabel').value.trim(),sponsor_name:$('wkSponsor').value.trim(),prize:$('wkPrize').value.trim()};
+  const q=CW?sb.from('weekly_contest').update(data).eq('id',CW.id):sb.from('weekly_contest').insert({...data,active:false});
+  const {error}=await q;
+  if(error){toast('تعذر الحفظ: '+error.message,true);return}
+  toast('انحفظت المسابقة ✅');await loadAdmWeek();await loadWeek();
+}
+async function admWeekToggle(){
+  const {error}=await sb.from('weekly_contest').update({active:!CW.active}).eq('id',CW.id);
+  if(error){toast('فشلت العملية',true);return}
+  toast(CW.active?'أُوقفت المسابقة':'انطلقت المسابقة للجمهور 🎉');
+  await loadAdmWeek();await loadWeek();
+}
+async function admWeekAdd(pid){
+  if(!CW){toast('أنشئ المسابقة أول من تبويب 🏆',true);return}
+  const en=await sb.from('weekly_entries').select('photo_id').eq('contest_id',CW.id);
+  if((en.data||[]).length>=5){toast('اكتمل العدد — 5 لقطات كحد أقصى',true);return}
+  const {error}=await sb.from('weekly_entries').insert({contest_id:CW.id,photo_id:pid});
+  if(error){toast(error.code==='23505'?'مرشحة من قبل':'تعذر الترشيح',true);return}
+  toast('انضافت للترشيحات 🏆');
+}
+async function admWeekRemove(pid){
+  await sb.from('weekly_entries').delete().eq('contest_id',CW.id).eq('photo_id',pid);
+  toast('أُزيلت');await loadAdmWeek();
 }

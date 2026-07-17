@@ -159,3 +159,17 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .toast.err{background:var(--sadu)}
 .loader{text-align:center;padding:40px;color:var(--txt-dim);font-size:14px}
 .page{display:none}.page.on{display:block}
+
+/* ====== لقطة الأسبوع ====== */
+.week-strip{background:linear-gradient(135deg,#FFF7E0,var(--card));border:1.5px solid var(--star);border-radius:14px;padding:12px 14px;font-size:13.5px;text-align:center;cursor:pointer;color:var(--txt)}
+.week-strip b{color:var(--sadu)}
+.wvote{width:100%;margin-top:8px;font-size:12.5px;padding:9px}
+.wvote.on{background:var(--palm)}
+.wcard.voted{border-color:var(--palm);box-shadow:0 0 0 2px rgba(46,139,87,.25)}
+/* ====== المتابعة ====== */
+.follow-row{display:flex;align-items:center;gap:10px;margin:-6px 0 14px}
+.fcount{font-size:13px;color:var(--txt-dim);font-weight:700}
+.fbtn{background:var(--card);border:1.5px solid var(--sadu);color:var(--sadu);border-radius:20px;padding:6px 16px;font-family:'Tajawal';font-weight:700;font-size:12.5px;cursor:pointer}
+.fbtn.on{background:var(--palm);border-color:var(--palm);color:#fff}
+/* ====== زر الخريطة ====== */
+.mapbtn{display:inline-block;margin-top:6px;background:var(--card);border:1.5px solid var(--palm);color:var(--palm);border-radius:12px;padding:6px 13px;font-size:12px;font-weight:700;text-decoration:none}
