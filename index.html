@@ -13,12 +13,12 @@
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icon-512.png">
-<link rel="manifest" href="manifest.json?x=m7">
+<link rel="manifest" href="manifest.json?x=m8">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="supabase.js?x=m7"></script>
-<link rel="stylesheet" href="style.css?x=m7">
+<script src="supabase.js?x=m8"></script>
+<link rel="stylesheet" href="style.css?x=m8">
 </head>
 <body>
 
@@ -48,6 +48,16 @@
     <button class="btn hero-cta" onclick="go('add')">📷 انشر أول صورة لك</button>
   </div>
   <div class="filters">
+    <div class="cat-row" id="catRow">
+      <button class="cat-chip on" onclick="setCat('all')" data-k="all">الكل</button>
+      <button class="cat-chip" onclick="setCat('nature')" data-k="nature">🌿 طبيعة</button>
+      <button class="cat-chip" onclick="setCat('arch')" data-k="arch">🏛️ عمارة</button>
+      <button class="cat-chip" onclick="setCat('wildlife')" data-k="wildlife">🦅 طيور وحيوانات</button>
+      <button class="cat-chip" onclick="setCat('people')" data-k="people">👥 أشخاص</button>
+      <button class="cat-chip" onclick="setCat('bw')" data-k="bw">⬛ أبيض وأسود</button>
+      <button class="cat-chip" onclick="setCat('landmark')" data-k="landmark">🕌 معلم</button>
+      <button class="cat-chip" onclick="setCat('other')" data-k="other">📷 أخرى</button>
+    </div>
     <div class="search-box">🔎<input id="q" placeholder="ابحث باسم القرية أو المكان..." oninput="render()"></div>
     <div class="sel-row">
       <select id="fRegion" onchange="fillCities();render()"><option value="">كل المناطق</option></select>
@@ -110,6 +120,17 @@
     <input type="file" id="fileLive" accept="image/*" capture="environment" style="display:none" onchange="pickImg(this,true)">
     <input type="file" id="fileGal" accept="image/*" style="display:none" onchange="pickImg(this,false)">
     <div class="f-group"><label>عنوان الصورة</label><input id="aTitle" placeholder="مثال: غروب على جبال السودة"></div>
+    <div class="f-group"><label>تصنيف الصورة</label>
+      <select id="aCat">
+        <option value="nature">🌿 طبيعة</option>
+        <option value="arch">🏛️ عمارة</option>
+        <option value="wildlife">🦅 طيور وحيوانات</option>
+        <option value="people">👥 أشخاص</option>
+        <option value="bw">⬛ أبيض وأسود</option>
+        <option value="landmark">🕌 معلم</option>
+        <option value="other" selected>📷 أخرى</option>
+      </select>
+    </div>
     <div class="f-group" id="grpRegion"><label>المنطقة</label><select id="aRegion" onchange="fillAddCities()"></select></div>
     <div class="f-group" id="grpCity"><label>المدينة / المحافظة</label><select id="aCity"></select></div>
     <div class="f-group" id="grpVillage"><label>القرية أو الحي (اختياري)</label><input id="aVillage" list="villList" placeholder="مثال: قرية رجال ألمع"><datalist id="villList"></datalist></div>
@@ -182,7 +203,7 @@
       </div>
       <button class="btn" style="width:100%;padding:13px" id="accGo" onclick="accSubmit()">دخول</button>
       <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--txt-dim)">
-        <a href="terms.html" target="_blank" style="color:var(--txt-dim)">الشروط والأحكام</a> · <a href="privacy.html" target="_blank" style="color:var(--txt-dim)">سياسة الخصوصية</a>
+        <a href="terms.html" target="_blank" style="color:var(--txt-dim)">الشروط والأحكام</a> · <a href="privacy.html" target="_blank" style="color:var(--txt-dim)">سياسة الخصوصية</a> · <a href="about.html" target="_blank" style="color:var(--txt-dim)">من نحن</a>
       </div>
     </div>
     <!-- مسجل -->
@@ -195,6 +216,7 @@
           <button class="btn" onclick="saveMyName()">حفظ</button>
         </div>
       </div>
+      <div id="myStats"></div>
       <button class="btn" id="accAdminBtn" style="width:100%;padding:13px;margin-bottom:10px;display:none" onclick="openAdmin()">⚙️ فتح لوحة الإشراف</button>
       <button class="btn" style="width:100%;padding:13px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="accLogout()">🚪 تسجيل الخروج</button>
     </div>
@@ -257,6 +279,16 @@
   </div>
 </div>
 
+<!-- ====== عارض الزوم ====== -->
+<div id="lightbox" onclick="if(event.target===this)zoomClose()">
+  <div class="lb-bar">
+    <button onclick="lbScaleBy(1.5)">➕</button>
+    <button onclick="lbScaleBy(1/1.5)">➖</button>
+    <button onclick="zoomClose()">✕</button>
+  </div>
+  <div class="lb-scroll" id="lbScroll"><img id="lbImg" ondblclick="lbDbl()" alt=""></div>
+</div>
+
 <nav>
   <button class="nav-btn on" id="nb-feed" onclick="go('feed')"><span class="ic">🏞️</span>الصور</button>
   <button class="nav-btn" onclick="openAcc()"><span class="ic">👤</span>حسابي</button>
@@ -266,14 +298,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?x=m7"></script>
-<script src="places.js?x=m7"></script>
-<script src="capture.js?x=m7"></script>
-<script src="photos.js?x=m7"></script>
-<script src="week.js?x=m7"></script>
-<script src="upload.js?x=m7"></script>
-<script src="auth.js?x=m7"></script>
-<script src="admin.js?x=m7"></script>
-<script src="main.js?x=m7"></script>
+<script src="app.js?x=m8"></script>
+<script src="places.js?x=m8"></script>
+<script src="capture.js?x=m8"></script>
+<script src="photos.js?x=m8"></script>
+<script src="week.js?x=m8"></script>
+<script src="upload.js?x=m8"></script>
+<script src="auth.js?x=m8"></script>
+<script src="admin.js?x=m8"></script>
+<script src="main.js?x=m8"></script>
 </body>
 </html>

@@ -62,6 +62,7 @@ function render(){
   const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
   const abroadView=sortMode==='abroad';
   let list=photos.filter(p=>!!p.abroad===abroadView);
+  if(catFilter!=='all')list=list.filter(p=>(p.category||'other')===catFilter);
   if(abroadView){
     list=list.filter(p=>!q||p.title.includes(q)||(p.country||'').includes(q));
     list.sort((a,b)=>(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)||(new Date(b.created_at)-new Date(a.created_at)));
@@ -74,7 +75,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م7`;
+  $('totalPill').textContent=`${photos.length} صورة · م8`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -101,12 +102,13 @@ function render(){
 async function openSheet(id){
   curId=id;curPhoto=photos.find(x=>x.id===id);
   const p=curPhoto;
-  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" alt="${esc(p.title)}">
+  $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" onclick="zoomOpen(this.src)" alt="${esc(p.title)}">
     <button class="zoombtn" id="zoomBtn" onclick="togglePhotoZoom()">⤢ عرض كامل</button>`;
+  if(!seenViews.has(p.id)){seenViews.add(p.id);sb.rpc('bump_view',{pid:p.id}).catch(()=>{});}
   $('sPh').classList.remove('full');
   $('sTitle').textContent=p.title;
   $('sLoc').innerHTML=(p.abroad?`🌍 عدسة مسافر · ${esc(p.country||p.city)} — عدسة ${esc(p.photographer)}`:`📍 ${esc(p.region)} · ${esc(p.city)}${p.village?' · '+esc(p.village):''} — عدسة ${esc(p.photographer)}`)
-    +(p.lat?`<br><a class="mapbtn" href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank">🗺️ افتح الموقع على قوقل ماب</a>`:'');
+    +`<br><a class="mapbtn" href="${p.lat?`https://maps.google.com/?q=${p.lat},${p.lng}`:`https://maps.google.com/?q=${encodeURIComponent(p.abroad?(p.country||p.city):((p.village?p.village+' ':'')+p.city+' '+p.region))}`}" target="_blank" rel="noopener">🗺️ افتح الموقع على قوقل ماب${p.lat?'':' (بحث بالاسم)'}</a>`;
   renderFollow(p);
   $('overlay').classList.add('show');
   document.body.style.overflow='hidden';
@@ -131,6 +133,7 @@ function rankOf(p){
   if(ph>=5||fo>=5)  return{ic:'📸',t:'عدسة الديرة',c:'silver'};
   return{ic:'🌱',t:'مستكشف',c:'bronze'};
 }
+const seenViews=new Set();
 async function renderFollow(p){
   const el=$('sFollow');if(!el)return;
   const mine=USER&&p.user_id===USER.id;
@@ -229,3 +232,21 @@ async function refreshOne(){
     drawStars();renderPoll();render();
   }
 }
+
+/* ====== عارض الزوم ====== */
+let lbW=100;
+function zoomOpen(src){
+  lbW=100;
+  const im=$('lbImg');im.src=src;im.style.width='100%';
+  $('lightbox').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function zoomClose(){
+  $('lightbox').classList.remove('show');
+  document.body.style.overflow='';
+}
+function lbScaleBy(f){
+  lbW=Math.min(600,Math.max(100,lbW*f));
+  $('lbImg').style.width=lbW+'%';
+}
+function lbDbl(){lbW=lbW>100?100:250;$('lbImg').style.width=lbW+'%';}

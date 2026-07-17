@@ -182,3 +182,22 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 /* ====== الفائز ====== */
 .wcard.winner{border:2.5px solid var(--star);box-shadow:0 0 0 3px rgba(232,160,32,.25),0 4px 14px rgba(232,160,32,.3)}
 .week-strip.win{background:linear-gradient(135deg,#FFF4D6,#FFFDF5);border-color:var(--star)}
+
+/* ====== شريط التصنيفات ====== */
+.cat-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-chip{flex:0 0 auto;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:7px 14px;font-family:'Tajawal';font-size:12.5px;font-weight:700;color:var(--txt-dim);cursor:pointer;white-space:nowrap}
+.cat-chip.on{background:var(--sadu);border-color:var(--sadu);color:#fff}
+/* ====== إحصائياتي ====== */
+.mst-row{display:flex;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:7px;font-size:13.5px}
+.mst-row b{color:var(--sand)}
+.mst-photo{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:12px;align-items:center}
+.mst-photo .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+/* ====== عارض الزوم ====== */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(10,8,6,.96);z-index:200}
+#lightbox.show{display:block}
+.lb-scroll{width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+#lbImg{display:block;width:100%;max-width:none;margin:auto;transition:width .15s}
+.lb-bar{position:fixed;top:12px;left:12px;z-index:210;display:flex;gap:8px}
+.lb-bar button{width:42px;height:42px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font-size:16px;cursor:pointer;backdrop-filter:blur(4px)}
+.sheet .ph img{cursor:zoom-in}

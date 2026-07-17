@@ -109,7 +109,7 @@ async function addPhoto(){
     ]);
     if(up.error)throw up.error;
     const ins=await sb.from('photos').insert({
-      user_id:USER.id,title,region,city,
+      user_id:USER.id,title,region,city,category:$('aCat').value||'other',
       abroad:isAbroad,country,
       village:isAbroad?'':$('aVillage').value.trim(),
       lat:pendingGeo?.lat??null,lng:pendingGeo?.lng??null,
