@@ -80,7 +80,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م9`;
+  $('totalPill').textContent=`${photos.length} صورة · م10`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -109,7 +109,7 @@ async function openSheet(id){
   const p=curPhoto;
   $('sPh').innerHTML=`<img src="${imgUrl(p.image_path)}" onclick="zoomOpen(this.src)" alt="${esc(p.title)}">
     <button class="zoombtn" id="zoomBtn" onclick="togglePhotoZoom()">⤢ عرض كامل</button>`;
-  if(!seenViews.has(p.id)){seenViews.add(p.id);sb.rpc('bump_view',{pid:p.id}).catch(()=>{});}
+  if(!seenViews.has(p.id)){seenViews.add(p.id);try{sb.rpc('bump_view',{pid:p.id}).then(()=>{},()=>{})}catch(_){}}
   $('sPh').classList.remove('full');
   $('sTitle').textContent=p.title;
   $('sLoc').innerHTML=(p.abroad?`🌍 عدسة مسافر · ${esc(p.country||p.city)} — عدسة ${esc(p.photographer)}`:`📍 ${esc(p.region)} · ${esc(p.city)}${p.village?' · '+esc(p.village):''} — عدسة ${esc(p.photographer)}`)
