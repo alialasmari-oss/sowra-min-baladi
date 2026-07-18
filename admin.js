@@ -245,7 +245,7 @@ async function loadAdmWeek(){
       <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
         <div style="flex:1"><b style="font-size:13px">#${p.id} · ${esc(p.title)}</b></div>
         <button class="btn" style="font-size:12px;padding:7px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admWeekRemove(${p.id})">إزالة</button>
-      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock();
+      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock() + admMaintBlock();
 }
 /* ====== بنر الراعي ====== */
 async function admSpBlock(){
@@ -373,4 +373,34 @@ async function admClearBadges(pid){
   if(error){toast('فشل المسح: '+error.message,true);return}
   toast(k?'انمسح الوسام المحدد 🗳️':'انصفرت كل أوسمة الصورة 🗳️');
   await loadPhotos();openAdmin();
+}
+
+/* ====== وضع الصيانة ====== */
+function admMaintBlock(){
+  const b=window.__SPB||{};
+  const on=!!b.maintenance;
+  return `
+  <div style="background:var(--card);border:1.5px solid ${on?'var(--star)':'var(--line)'};border-radius:14px;padding:14px;margin-top:16px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">🚧 وضع الصيانة (تحت الإنشاء) ${on?'<span style="font-size:11px;color:#A87500;font-weight:700">● مفعل — الزوار محجوبون</span>':'<span style="font-size:11px;color:var(--txt-dim)">○ مطفأ</span>'}</div>
+    <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px;line-height:1.8">عند التفعيل: الزوار يشوفون صفحة «تحت التطوير» — وأنت كمشرف تتصفح وتشتغل عادي.</div>
+    <input id="mtMsg" placeholder="رسالة اختيارية للزوار (مثال: نرجع لكم الساعة 9)" value="${esc(b.maintenance_msg||'')}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px">
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admMaintSaveMsg()">💾 حفظ الرسالة</button>
+      <button class="btn" style="flex:1;${on?'background:var(--palm)':'background:var(--star);color:var(--ink)'}" onclick="admMaintToggle()">${on?'▶️ إعادة فتح الموقع':'🚧 تفعيل الصيانة'}</button>
+    </div>
+  </div>`;
+}
+async function admMaintToggle(){
+  const b=window.__SPB||{};
+  const to=!b.maintenance;
+  if(to&&!confirm('تفعيل وضع الصيانة؟ كل الزوار (عدا المشرفين) بيشوفون صفحة تحت التطوير.'))return;
+  const {error}=await sb.from('site_banner').update({maintenance:to,maintenance_msg:$('mtMsg').value.trim()}).eq('id',1);
+  if(error){toast('فشلت العملية: '+error.message,true);return}
+  toast(to?'الموقع دخل وضع الصيانة 🚧':'الموقع رجع مفتوحاً للجميع 🎉');
+  await loadAdmWeek();
+}
+async function admMaintSaveMsg(){
+  const {error}=await sb.from('site_banner').update({maintenance_msg:$('mtMsg').value.trim()}).eq('id',1);
+  if(error){toast('فشل الحفظ',true);return}
+  toast('انحفظت الرسالة ✅');
 }
