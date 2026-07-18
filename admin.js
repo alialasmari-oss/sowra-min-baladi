@@ -347,9 +347,22 @@ async function admWeekDelete(){
 }
 
 async function admClearBadges(pid){
-  if(!confirm('تصفير كل أصوات الأوسمة على الصورة #'+pid+'؟'))return;
-  const {error}=await sb.from('badge_votes').delete().eq('photo_id',pid);
+  const pick=prompt(
+'مسح أوسمة الصورة #'+pid+' — اكتب الرقم:\n\n'+
+'0 = الكل (تصفير شامل)\n'+
+'1 = 📱 تصلح خلفية شاشة\n'+
+'2 = ❤️ بحطها خلفية جوالي\n'+
+'3 = 🌍 مسابقات عالمية\n'+
+'4 = 🇸🇦 واجهة تشرّف السعودية\n'+
+'5 = 🖼️ تستاهل تنطبع لوحة','0');
+  if(pick===null)return;
+  const keys={1:'wall',2:'mine',3:'global',4:'face',5:'print'};
+  let q=sb.from('badge_votes').delete().eq('photo_id',pid);
+  const k=keys[pick.trim()];
+  if(pick.trim()!=='0'&&!k){toast('اكتب رقماً من 0 إلى 5',true);return}
+  if(k)q=q.eq('badge_key',k);
+  const {error}=await q;
   if(error){toast('فشل المسح: '+error.message,true);return}
-  toast('انصفرت أوسمة الصورة 🗳️');
+  toast(k?'انمسح الوسام المحدد 🗳️':'انصفرت كل أوسمة الصورة 🗳️');
   await loadPhotos();openAdmin();
 }
