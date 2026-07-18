@@ -26,8 +26,10 @@ function go(p){
   // 🚧 فحص الصيانة أولاً — الزائر المحجوب لا يتحمّل له محتوى أصلاً
   const mt=await sb.from('site_banner').select('maintenance,maintenance_msg').eq('id',1).maybeSingle().then(r=>r.data,()=>null);
   if(mt&&mt.maintenance){
-    await authP; // ننتظر حكم هوية المشرف فقط
-    if(!IS_ADMIN){showMaintenance(mt.maintenance_msg);return}
+    showMaintenance(mt.maintenance_msg); // الستارة تنزل فوراً على الجميع
+    await authP;
+    if(!IS_ADMIN)return; // الزائر يبقى خلف الستارة
+    hideMaintenance(); // المشرف: ترتفع له وحده ويكمل
     const chip=document.createElement('div');
     chip.style.cssText='position:fixed;top:10px;left:10px;z-index:9000;background:#FFF4D6;border:1.5px solid var(--star);border-radius:12px;padding:6px 13px;font-size:11.5px;font-weight:700;color:#A87500;box-shadow:0 2px 8px rgba(0,0,0,.15)';
     chip.textContent='🚧 وضع الصيانة مفعل — الزوار محجوبون';
@@ -40,12 +42,21 @@ function go(p){
 })();
 
 function showMaintenance(msg){
-  document.body.innerHTML=`
-  <div style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:'Tajawal'">
+  if($('maintScreen'))return;
+  const d=document.createElement('div');
+  d.id='maintScreen';
+  d.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:Tajawal';
+  d.innerHTML=`
     <div style="height:16px;width:100%;position:absolute;top:0;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='16' viewBox='0 0 128 16'%3E%3Crect width='128' height='16' fill='%23F7F1E3'/%3E%3Cpath d='M0 15 L16 2 L32 15 Z' fill='%23D63A2F' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M32 15 L48 2 L64 15 Z' fill='%232E6FB7' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M64 15 L80 2 L96 15 Z' fill='%23F2B33D' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M96 15 L112 2 L128 15 Z' fill='%232E8B57' stroke='%23241F1C' stroke-width='1.6'/%3E%3C/svg%3E\");background-repeat:repeat-x"></div>
     <div style="font-size:64px;margin-bottom:14px">🚧</div>
     <div style="font-family:'Reem Kufi';font-size:26px;color:var(--sadu);margin-bottom:10px">الموقع تحت التطوير</div>
     <div style="font-size:15px;color:var(--txt-dim);line-height:2;max-width:400px">${msg?msg.replace(/</g,'&lt;'):'نجهّز لكم شيئاً أجمل — نرجع قريباً بإذن الله 🇸🇦📸'}</div>
-    <div style="margin-top:26px;font-size:12px;color:var(--sand-dim)">صورة من بلدي — عدسات أهل الديار</div>
-  </div>`;
+    <div style="margin-top:26px;font-size:12px;color:var(--sand-dim)">صورة من بلدي — عدسات أهل الديار</div>`;
+  document.body.appendChild(d);
+  document.body.style.overflow='hidden';
+}
+function hideMaintenance(){
+  const d=$('maintScreen');
+  if(d)d.remove();
+  document.body.style.overflow='';
 }
