@@ -248,8 +248,9 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .fbtn.fav.on{background:var(--sadu);border-color:var(--sadu);color:#fff}
 
 /* ====== ستارة الصيانة ====== */
-#maintScreen{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:'Tajawal',sans-serif}
-.maint-strip{height:16px;width:100%;position:absolute;top:0;left:0;background-repeat:repeat-x}
+#maintScreen{display:none}
+#maintScreen.on{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:'Tajawal',sans-serif}
+.maint-strip{height:16px;width:100%;position:absolute;top:0;left:0;background-repeat:repeat-x;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="16"><rect width="128" height="16" fill="%23F7F1E3"/><path d="M0 15 L16 2 L32 15 Z" fill="%23D63A2F" stroke="%23241F1C" stroke-width="1.6"/><path d="M32 15 L48 2 L64 15 Z" fill="%232E6FB7" stroke="%23241F1C" stroke-width="1.6"/><path d="M64 15 L80 2 L96 15 Z" fill="%23F2B33D" stroke="%23241F1C" stroke-width="1.6"/><path d="M96 15 L112 2 L128 15 Z" fill="%232E8B57" stroke="%23241F1C" stroke-width="1.6"/></svg>')}
 .maint-ic{font-size:64px;margin-bottom:14px}
 .maint-title{font-family:'Reem Kufi',sans-serif;font-size:26px;color:var(--sadu);margin-bottom:10px}
 .maint-msg{font-size:15px;color:var(--txt-dim);line-height:2;max-width:400px}
