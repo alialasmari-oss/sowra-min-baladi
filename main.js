@@ -24,7 +24,9 @@ function go(p){
   // الدخول بالخلفية — والمحتوى العام يتحمل فوراً بالتوازي
   const authP=ensureAuth().then(()=>{checkAdmin();loadFavs();}).catch(e=>toast('تعذر الاتصال بالحساب',true));
   try{await Promise.all([loadPlaces(),loadPhotos()]);
-  loadWeek();loadSponsor();}
+  loadWeek();loadSponsor();
+  initHero();
+  showNearby();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}
   await authP;
 })();

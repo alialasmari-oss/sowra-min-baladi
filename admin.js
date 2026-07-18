@@ -258,6 +258,8 @@ async function admSpBlock(){
     <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px;line-height:1.8">📐 مقاس التصميم: <b>1600 × 400 بكسل</b> (نسبة 4:1) · JPG أو PNG · يفضل أقل من 300KB</div>
     ${b.image_path?`<img src="${imgUrl(b.image_path)}" style="width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:10px;border:1px solid var(--line);margin-bottom:10px">`:''}
     <input type="file" id="spFile" accept="image/*" style="display:none" onchange="admSpUpload(this.files[0])">
+    <input id="spName" placeholder="اسم الراعي (مثال: متجر عدسة)" value="${esc(b.sponsor_name||'')}"/>
+    <input id="spCat" placeholder="النشاط (مثال: معدات تصوير)" value="${esc(b.sponsor_cat||'')}"/>
     <input id="spLink" placeholder="رابط الراعي عند الضغط (اختياري)" value="${esc(b.link_url)}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px;direction:ltr;text-align:left">
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" style="flex:1" onclick="$('spFile').click()">📤 ${b.image_path?'تغيير الصورة':'رفع صورة البنر'}</button>
@@ -274,13 +276,13 @@ async function admSpUpload(f){
   const path=`banners/sponsor_${Date.now()}.jpg`;
   const up=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});
   if(up.error){toast('فشل الرفع: '+up.error.message,true);return}
-  const {error}=await sb.from('site_banner').update({image_path:path,updated_at:new Date().toISOString()}).eq('id',1);
+  const {error}=await sb.from('site_banner').update({image_path:path,sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim(),updated_at:new Date().toISOString()}).eq('id',1);
   if(error){toast('فشل الحفظ',true);return}
   toast('ارتفع البنر ✅ — فعّله متى ما جهزت');
   await loadAdmWeek();loadSponsor();
 }
 async function admSpSaveLink(){
-  const {error}=await sb.from('site_banner').update({link_url:$('spLink').value.trim()}).eq('id',1);
+  const {error}=await sb.from('site_banner').update({link_url:$('spLink').value.trim(),sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim()}).eq('id',1);
   if(error){toast('فشل الحفظ',true);return}
   toast('انحفظ الرابط ✅');loadSponsor();
 }

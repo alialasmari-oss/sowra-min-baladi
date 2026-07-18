@@ -1,3 +1,93 @@
+
+/* ====== الفلتر الموحد ====== */
+let _cat='all', _sort='top';
+function toggleFilter(){
+  const d=$('filterDrawer');
+  const open=d.style.display==='none';
+  d.style.display=open?'block':'none';
+  $('filterBtn').classList.toggle('active',open);
+}
+function fdSetCat(el,k){
+  _cat=k;
+  document.querySelectorAll('.fd-chips .fd-chip[data-k]').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+}
+function fdSetSort(el,s){
+  _sort=s;
+  document.querySelectorAll('.fd-chips .fd-chip[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+}
+function applyFilter(){
+  catFilter=_cat;
+  sortMode=_sort;
+  $('filterDrawer').style.display='none';
+  $('filterBtn').classList.remove('active');
+  const badge=$('filterBadge');
+  badge.style.display=(catFilter!=='all'||sortMode!=='top')?'inline':'none';
+  $('abroadHint').style.display=sortMode==='abroad'?'block':'none';
+  render();
+}
+function clearFilter(){
+  _cat='all';_sort='top';
+  document.querySelectorAll('.fd-chip[data-k]').forEach(b=>b.classList.toggle('on',b.dataset.k==='all'));
+  document.querySelectorAll('.fd-chip[data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s==='top'));
+  catFilter='all';sortMode='top';
+  $('filterBadge').style.display='none';
+  $('abroadHint').style.display='none';
+  $('filterDrawer').style.display='none';
+  $('filterBtn').classList.remove('active');
+  render();
+}
+
+/* ====== الأقرب إليك ====== */
+function showNearby(){
+  if(!navigator.geolocation){return}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude:lat,longitude:lng}=pos.coords;
+    const dist=(p)=>Math.hypot((p.lat||0)-lat,(p.lng||0)-lng);
+    const near=photos.filter(p=>p.lat&&p.lng).sort((a,b)=>dist(a)-dist(b)).slice(0,6);
+    if(!near.length)return;
+    $('nearbyWrap').style.display='block';
+    $('nearbyFeed').innerHTML=near.map(p=>`
+      <div class="card" onclick="openSheet(${p.id})">
+        <div class="ph"><img src="${thumbUrl(p.image_path)}" loading="lazy" alt="${esc(p.title)}">
+          <div class="loc-chip">📍 ${esc(p.village||p.city)}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title">${esc(p.title)}</div>
+          <div class="card-meta"><span>⭐ ${Number(p.avg_stars).toFixed(1)}</span></div>
+        </div>
+      </div>`).join('');
+  },()=>{},{timeout:5000});
+}
+
+/* ====== البنر الترحيبي مرة وحدة ====== */
+function initHero(){
+  const el=$('hero');if(!el)return;
+  try{
+    if(localStorage.getItem('sowra_hero_seen')){el.style.display='none';return;}
+    el.style.display='block';
+  }catch(e){el.style.display='block';}
+}
+function closeHero(){
+  $('hero').style.display='none';
+  try{localStorage.setItem('sowra_hero_seen','1')}catch(e){}
+}
+
+/* ====== البنر الجانبي للراعي ====== */
+function renderSponsorSide(){
+  const el=$('sponsorSide');if(!el)return;
+  const sp=window.__SPDATA;
+  if(!sp||!sp.active||!sp.image_path){el.style.display='none';return;}
+  const logo=imgUrl(sp.image_path);
+  el.style.display='flex';
+  el.innerHTML=`<img src="${logo}" alt="${esc(sp.sponsor_name||'راعي المنصة')}">
+    <div class="sp-info">
+      <div class="sp-name">${esc(sp.sponsor_name||'راعي المنصة')}</div>
+      <div class="sp-cat">${esc(sp.sponsor_cat||'')}</div>
+    </div>
+    <span class="sp-tag">راعي</span>`;
+  el.onclick=()=>openSponsorsPage();
+  el.style.cursor='pointer';
+}
 /* صورة من بلدي — photos.js | نسخة المختبر م1 */
 /* ============ الأوسمة ============ */
 const BADGES = [
@@ -15,11 +105,7 @@ function topBadge(p){
 
 /* ============ الحالة ============ */
 let photos=[], sortMode='top', curId=null, curPhoto=null, catFilter='all';
-function setCat(k){
-  catFilter=k;
-  document.querySelectorAll('.cat-chip').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
-  render();
-}
+
 let myRating=0, myBadgeSet=new Set();
 const $=id=>document.getElementById(id);
 /* تعقيم النصوص — يمنع حقن أي كود في الصفحة */
@@ -54,15 +140,7 @@ function fillAddCities(){
   if(r)GEO[r].forEach(x=>c.innerHTML+=`<option>${x}</option>`);
   $('villList').innerHTML=(r&&VILL[r]?VILL[r]:[]).map(v=>`<option value="${v}">`).join('');
 }
-function setSort(m){
-  sortMode=m;
-  $('tabTop').classList.toggle('on',m==='top');
-  $('tabNew').classList.toggle('on',m==='new');
-  $('tabAbroad').classList.toggle('on',m==='abroad');
-  $('tabMap').classList.toggle('on',m==='map');
-  $('abroadHint').style.display=m==='abroad'?'block':'none';
-  render();
-}
+
 
 function render(){
   const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
@@ -84,7 +162,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م22`;
+  $('totalPill').textContent=`${photos.length} صورة · م23`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{

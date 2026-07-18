@@ -37,14 +37,14 @@
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icon-512.png">
-<link rel="manifest" href="manifest.json?x=m22">
+<link rel="manifest" href="manifest.json?x=m23">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="supabase.js?x=m22"></script>
-<script src="leaflet.js?x=m22"></script>
-<link rel="stylesheet" href="style.css?x=m22">
-<link rel="stylesheet" href="leaflet.css?x=m22">
+<script src="supabase.js?x=m23"></script>
+<script src="leaflet.js?x=m23"></script>
+<link rel="stylesheet" href="style.css?x=m23">
+<link rel="stylesheet" href="leaflet.css?x=m23">
 </head>
 <body>
 
@@ -77,30 +77,52 @@
     <button class="btn hero-cta" onclick="go('add')">📷 انشر أول صورة لك</button>
   </div>
   <div class="filters">
-    <div class="cat-row" id="catRow">
-      <button class="cat-chip on" onclick="setCat('all')" data-k="all">الكل</button>
-      <button class="cat-chip" onclick="setCat('nature')" data-k="nature">🌿 طبيعة</button>
-      <button class="cat-chip" onclick="setCat('arch')" data-k="arch">🏛️ عمارة</button>
-      <button class="cat-chip" onclick="setCat('wildlife')" data-k="wildlife">🦅 طيور وحيوانات</button>
-      <button class="cat-chip" onclick="setCat('people')" data-k="people">👥 أشخاص</button>
-      <button class="cat-chip" onclick="setCat('bw')" data-k="bw">⬛ أبيض وأسود</button>
-      <button class="cat-chip" onclick="setCat('landmark')" data-k="landmark">🕌 معلم</button>
-      <button class="cat-chip" onclick="setCat('other')" data-k="other">📷 أخرى</button>
+    <div class="filter-bar">
+      <div class="search-box">🔎<input id="q" placeholder="ابحث باسم القرية أو المكان..." oninput="render()"></div>
+      <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">⚙️ فلتر<span id="filterBadge" class="f-badge" style="display:none">●</span></button>
     </div>
-    <div class="search-box">🔎<input id="q" placeholder="ابحث باسم القرية أو المكان..." oninput="render()"></div>
-    <div class="sel-row">
-      <select id="fRegion" onchange="fillCities();render()"><option value="">كل المناطق</option></select>
-      <select id="fCity" onchange="render()"><option value="">كل المدن</option></select>
+    <div class="filter-drawer" id="filterDrawer" style="display:none">
+      <div class="fd-section">
+        <div class="fd-label">التصنيف</div>
+        <div class="fd-chips">
+          <button class="fd-chip on" data-k="all" onclick="fdSetCat(this,'all')">الكل</button>
+          <button class="fd-chip" data-k="nature" onclick="fdSetCat(this,'nature')">🌿 طبيعة</button>
+          <button class="fd-chip" data-k="arch" onclick="fdSetCat(this,'arch')">🏛️ عمارة</button>
+          <button class="fd-chip" data-k="wildlife" onclick="fdSetCat(this,'wildlife')">🦅 طيور وحيوانات</button>
+          <button class="fd-chip" data-k="people" onclick="fdSetCat(this,'people')">👥 أشخاص</button>
+          <button class="fd-chip" data-k="bw" onclick="fdSetCat(this,'bw')">⬛ أبيض وأسود</button>
+          <button class="fd-chip" data-k="landmark" onclick="fdSetCat(this,'landmark')">🕌 معلم</button>
+          <button class="fd-chip" data-k="other" onclick="fdSetCat(this,'other')">📷 أخرى</button>
+        </div>
+      </div>
+      <div class="fd-section">
+        <div class="fd-label">المنطقة والمدينة</div>
+        <div style="display:flex;gap:8px">
+          <select id="fRegion" style="flex:1" onchange="fillCities();render()"><option value="">كل المناطق</option></select>
+          <select id="fCity" style="flex:1" onchange="render()"><option value="">كل المدن</option></select>
+        </div>
+      </div>
+      <div class="fd-section">
+        <div class="fd-label">الترتيب</div>
+        <div class="fd-chips">
+          <button class="fd-chip on" data-s="top" onclick="fdSetSort(this,'top')">⭐ الأعلى</button>
+          <button class="fd-chip" data-s="new" onclick="fdSetSort(this,'new')">🕐 الأحدث</button>
+          <button class="fd-chip" data-s="abroad" onclick="fdSetSort(this,'abroad')">🌍 عدسة مسافر</button>
+          <button class="fd-chip" data-s="map" onclick="fdSetSort(this,'map')">🗺️ الخريطة</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn" style="flex:1;background:var(--palm)" onclick="applyFilter()">✓ تطبيق</button>
+        <button class="btn" style="flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="clearFilter()">✕ مسح</button>
+      </div>
     </div>
-    <div class="sort-tabs">
-      <div class="sort-tab on" id="tabTop" onclick="setSort('top')">⭐ الأعلى تقييماً</div>
-      <div class="sort-tab" id="tabNew" onclick="setSort('new')">🕐 الأحدث</div>
-      <div class="sort-tab" id="tabAbroad" onclick="setSort('abroad')">🌍 عدسة مسافر</div>
-      <div class="sort-tab" id="tabMap" onclick="setSort('map')">🗺️ الخريطة</div>
-      <div class="sort-tab" onclick="openSponsorsPage()">🤝 الرعاة</div>
-    </div>
-    <div id="abroadHint" style="display:none;background:var(--card);border:1.5px dashed var(--qblue);border-radius:14px;padding:11px 14px;font-size:12.5px;color:var(--txt-dim);line-height:1.8;text-align:center">🌍 <b style="color:var(--qblue)">عدسة مسافر</b> — إذا كنت مسافراً خارج السعودية، نستقبل هنا لقطاتك من حول العالم بعيون أهل الديار. أما صور مناطق المملكة فمكانها الساحة الرئيسية 🇸🇦</div>
+    <div id="abroadHint" style="display:none;background:var(--card);border:1.5px dashed var(--qblue);border-radius:14px;padding:11px 14px;font-size:12.5px;color:var(--txt-dim);line-height:1.8;text-align:center">🌍 <b style="color:var(--qblue)">عدسة مسافر</b> — لقطاتك من خارج المملكة هنا 🇸🇦</div>
   </div>
+  <div id="nearbyWrap" style="display:none">
+    <div class="nearby-title">📍 الأقرب إليك</div>
+    <div class="feed" id="nearbyFeed" style="margin-bottom:4px"></div>
+  </div>
+  <div id="sponsorSide" style="display:none" class="sponsor-side"></div>
   <div id="mapWrap" style="display:none">
       <div id="map"></div>
       <div id="mapSponsor"></div>
@@ -363,14 +385,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?x=m22"></script>
-<script src="places.js?x=m22"></script>
-<script src="capture.js?x=m22"></script>
-<script src="photos.js?x=m22"></script>
-<script src="week.js?x=m22"></script>
-<script src="upload.js?x=m22"></script>
-<script src="auth.js?x=m22"></script>
-<script src="admin.js?x=m22"></script>
-<script src="main.js?x=m22"></script>
+<script src="app.js?x=m23"></script>
+<script src="places.js?x=m23"></script>
+<script src="capture.js?x=m23"></script>
+<script src="photos.js?x=m23"></script>
+<script src="week.js?x=m23"></script>
+<script src="upload.js?x=m23"></script>
+<script src="auth.js?x=m23"></script>
+<script src="admin.js?x=m23"></script>
+<script src="main.js?x=m23"></script>
 </body>
 </html>

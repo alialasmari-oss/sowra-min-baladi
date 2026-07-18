@@ -89,6 +89,7 @@ async function loadSponsor(){
       +(b.link_url?'</a>':'')
       +`<span class="sp-tag">راعي المنصة</span>`;
     el.style.display='block';
+    if(typeof renderSponsorSide==='function')renderSponsorSide();
   }catch(e){el.style.display='none'}
 }
 

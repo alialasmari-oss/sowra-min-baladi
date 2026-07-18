@@ -256,3 +256,25 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .maint-msg{font-size:15px;color:var(--txt-dim);line-height:2;max-width:400px}
 .maint-foot{margin-top:26px;font-size:12px;color:var(--sand-dim)}
 .maint-chip{position:fixed;top:10px;left:10px;z-index:100000;background:#FFF4D6;border:1.5px solid var(--star);border-radius:12px;padding:6px 13px;font-size:11.5px;font-weight:700;color:#A87500;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+
+/* ====== الفلتر الموحد ====== */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.filter-btn{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:8px 16px;font-family:'Tajawal';font-size:13px;font-weight:700;color:var(--txt);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.filter-btn.active{border-color:var(--sadu);color:var(--sadu)}
+.f-badge{color:var(--sadu);margin-right:4px;font-size:10px}
+.filter-drawer{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.fd-section{margin-bottom:12px}
+.fd-label{font-size:12px;font-weight:700;color:var(--txt-dim);margin-bottom:7px}
+.fd-chips{display:flex;flex-wrap:wrap;gap:7px}
+.fd-chip{background:var(--card2);border:1.5px solid var(--line);border-radius:16px;padding:6px 13px;font-family:'Tajawal';font-size:12.5px;font-weight:700;color:var(--txt-dim);cursor:pointer}
+.fd-chip.on{background:var(--sadu);border-color:var(--sadu);color:#fff}
+/* ====== الأقرب إليك ====== */
+.nearby-title{font-size:14px;font-weight:700;padding:6px 2px 8px;color:var(--ink)}
+.nearby-feed{grid-template-columns:repeat(2,1fr);gap:10px}
+/* ====== البنر الجانبي ====== */
+.sponsor-side{background:var(--card);border:1.5px solid var(--star);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.sponsor-side img{width:48px;height:48px;border-radius:10px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+.sponsor-side .sp-info{min-width:0;flex:1}
+.sponsor-side .sp-name{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sponsor-side .sp-cat{font-size:11.5px;color:var(--txt-dim)}
+.sponsor-side .sp-tag{font-size:10px;background:#FFF4D6;color:#A87500;border:1px solid var(--star);border-radius:8px;padding:2px 8px;font-weight:700;flex-shrink:0}
