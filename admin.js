@@ -260,6 +260,10 @@ async function admSpBlock(){
     <input type="file" id="spFile" accept="image/*" style="display:none" onchange="admSpUpload(this.files[0])">
     <input id="spName" placeholder="اسم الراعي (مثال: متجر عدسة)" value="${esc(b.sponsor_name||'')}"/>
     <input id="spCat" placeholder="النشاط (مثال: معدات تصوير)" value="${esc(b.sponsor_cat||'')}"/>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="spLat" placeholder="خط العرض (اختياري)" type="number" step="any" value="${b.sponsor_lat||''}" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;direction:ltr">
+      <input id="spLng" placeholder="خط الطول (اختياري)" type="number" step="any" value="${b.sponsor_lng||''}" style="flex:1;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;direction:ltr">
+    </div>
     <input id="spLink" placeholder="رابط الراعي عند الضغط (اختياري)" value="${esc(b.link_url)}" style="width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--txt);font-family:'Tajawal';font-size:13px;outline:none;margin-bottom:10px;direction:ltr;text-align:left">
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" style="flex:1" onclick="$('spFile').click()">📤 ${b.image_path?'تغيير الصورة':'رفع صورة البنر'}</button>
@@ -276,13 +280,13 @@ async function admSpUpload(f){
   const path=`banners/sponsor_${Date.now()}.jpg`;
   const up=await sb.storage.from('photos').upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000'});
   if(up.error){toast('فشل الرفع: '+up.error.message,true);return}
-  const {error}=await sb.from('site_banner').update({image_path:path,sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim(),updated_at:new Date().toISOString()}).eq('id',1);
+  const {error}=await sb.from('site_banner').update({image_path:path,sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim(),sponsor_lat:parseFloat($('spLat').value)||null,sponsor_lng:parseFloat($('spLng').value)||null,updated_at:new Date().toISOString()}).eq('id',1);
   if(error){toast('فشل الحفظ',true);return}
   toast('ارتفع البنر ✅ — فعّله متى ما جهزت');
   await loadAdmWeek();loadSponsor();
 }
 async function admSpSaveLink(){
-  const {error}=await sb.from('site_banner').update({link_url:$('spLink').value.trim(),sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim()}).eq('id',1);
+  const {error}=await sb.from('site_banner').update({link_url:$('spLink').value.trim(),sponsor_name:$('spName').value.trim(),sponsor_cat:$('spCat').value.trim(),sponsor_lat:parseFloat($('spLat').value)||null,sponsor_lng:parseFloat($('spLng').value)||null}).eq('id',1);
   if(error){toast('فشل الحفظ',true);return}
   toast('انحفظ الرابط ✅');loadSponsor();
 }

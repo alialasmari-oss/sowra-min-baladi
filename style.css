@@ -278,3 +278,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .sponsor-side .sp-name{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sponsor-side .sp-cat{font-size:11.5px;color:var(--txt-dim)}
 .sponsor-side .sp-tag{font-size:10px;background:#FFF4D6;color:#A87500;border:1px solid var(--star);border-radius:8px;padding:2px 8px;font-weight:700;flex-shrink:0}
+/* ====== دبوس الراعي بالخريطة ====== */
+.sp-pin{text-align:center;position:relative}
+.sp-pin img{width:48px;height:48px;border-radius:50%;border:3px solid var(--star);box-shadow:0 2px 8px rgba(0,0,0,.4);display:block;margin:0 auto}
+.sp-pin-label{background:var(--star);color:var(--ink);font-size:10px;font-weight:700;border-radius:8px;padding:2px 7px;margin-top:3px;white-space:nowrap;font-family:'Tajawal'}
+/* ====== دبوس موقع المستخدم ====== */
+.user-pin{text-align:center}
+.user-pin-label{background:var(--qblue);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:2px 7px;margin-top:2px;white-space:nowrap;font-family:'Tajawal'}

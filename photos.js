@@ -42,6 +42,9 @@ function showNearby(){
   if(!navigator.geolocation){return}
   navigator.geolocation.getCurrentPosition(pos=>{
     const{latitude:lat,longitude:lng}=pos.coords;
+    window.__USER_LAT=lat;window.__USER_LNG=lng;
+    // لو الخريطة مفتوحة — أضف دبوس موقعك الآن
+    if(MAP)addUserPin(lat,lng);
     const dist=(p)=>Math.hypot((p.lat||0)-lat,(p.lng||0)-lng);
     const near=photos.filter(p=>p.lat&&p.lng).sort((a,b)=>dist(a)-dist(b)).slice(0,6);
     if(!near.length)return;
@@ -162,7 +165,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م23`;
+  $('totalPill').textContent=`${photos.length} صورة · م24`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -404,9 +407,24 @@ function renderMap(){
     pts.push([p.lat,p.lng]);
   });
   if(pts.length)MAP.fitBounds(pts,{padding:[46,46],maxZoom:12});
-  setTimeout(()=>MAP.invalidateSize(),120);
+  // دبوس الراعي
+  const spd=window.__SPDATA;
+  if(spd&&spd.active&&spd.image_path&&spd.sponsor_lat&&spd.sponsor_lng){
+    const sic=L.divIcon({className:'',html:`<div class="pmark sp-pin"><img src="${imgUrl(spd.image_path)}"><div class="sp-pin-label">${esc(spd.sponsor_name||'راعي')}</div></div>`,iconSize:[54,66],iconAnchor:[27,66]});
+    L.marker([spd.sponsor_lat,spd.sponsor_lng],{icon:sic,zIndexOffset:1000}).addTo(MARKS).on('click',()=>openSponsorsPage());
+  }
+  setTimeout(()=>{MAP.invalidateSize();if(window.__USER_LAT)addUserPin(window.__USER_LAT,window.__USER_LNG);},120);
   const sp=window.__SPDATA;
   $('mapSponsor').innerHTML=(sp&&sp.active&&sp.image_path)
-    ?((sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener">`:'')+`<img src="${imgUrl(sp.image_path)}" alt="راعي المنصة">`+(sp.link_url?'</a>':''))
+    ?((sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener">`:'')+`<img src="${imgUrl(spd.image_path)}" alt="راعي المنصة">`+(sp.link_url?'</a>':''))
     :'';
+}
+
+/* ====== دبوس موقع المستخدم بالخريطة ====== */
+let _userPin=null;
+function addUserPin(lat,lng){
+  if(!MAP||typeof L==='undefined')return;
+  if(_userPin)_userPin.remove();
+  const ic=L.divIcon({className:'',html:'<div class="user-pin">📍<div class="user-pin-label">موقعي</div></div>',iconSize:[40,52],iconAnchor:[20,52]});
+  _userPin=L.marker([lat,lng],{icon:ic,zIndexOffset:2000}).addTo(MAP);
 }
