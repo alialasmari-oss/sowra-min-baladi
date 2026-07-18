@@ -165,6 +165,7 @@ function admRender(){
           <button class="btn" style="font-size:12px;padding:8px 12px;${p.hidden?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admHide(${p.id},${!p.hidden})">${p.hidden?'👁️ إظهار':'🙈 إخفاء'}</button>
           <button class="btn" style="font-size:12px;padding:8px 12px" onclick="admDel(${p.id},'${p.image_path}')">🗑️ حذف نهائي</button>
           <button class="btn" style="font-size:12px;padding:8px 12px;background:var(--star);color:var(--ink)" onclick="admWeekAdd(${p.id})">🏆 رشّح</button>
+          <button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admClearBadges(${p.id})">🗳️ مسح الأوسمة</button>
           <button class="btn" style="font-size:12px;padding:8px 12px;${p.profiles?.banned?'background:var(--palm)':'background:var(--card2);border:1px solid var(--line)'}" onclick="admBan('${p.user_id}',${!(p.profiles?.banned)})">${p.profiles?.banned?'فك الحظر':'⛔ حظر المصور'}</button>
           ${rc?`<button class="btn" style="font-size:12px;padding:8px 12px;background:var(--card2);border:1px solid var(--line)" onclick="admClear(${p.id})">مسح البلاغات</button>`:''}
         </div>
@@ -228,6 +229,7 @@ async function loadAdmWeek(){
         ${CW&&!CW.ended_at?`<button class="btn" style="flex:1;${CW.active?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admWeekToggle()">${CW.active?'⏸️ إيقاف':'▶️ تفعيل للجمهور'}</button>`:''}
         ${CW&&CW.active?`<button class="btn" style="flex:1;background:var(--star);color:var(--ink)" onclick="admWeekEnd()">🏁 إنهاء وإعلان الفائز</button>`:''}
         ${CW&&CW.ended_at?`<button class="btn" style="flex:1;background:var(--palm)" onclick="admWeekNew()">➕ مسابقة جديدة</button>`:''}
+        ${CW?`<button class="btn" style="flex:0 0 auto;background:var(--sadu)" onclick="admWeekDelete()">🗑️</button>`:''}
       </div>
     </div>
     <div style="font-weight:700;font-size:14px;margin-bottom:8px">اللقطات المرشحة (${entries.length}/5) <span style="font-size:11px;color:var(--txt-dim);font-weight:400">— رشّح من تبويب 🗂️ بزر 🏆</span></div>
@@ -334,4 +336,20 @@ async function admSpDelete(){
   if(error){toast('فشل الحذف',true);return}
   toast('انحذف البنر نهائياً 🗑️');
   await loadAdmWeek();loadSponsor();
+}
+
+async function admWeekDelete(){
+  if(!confirm(`حذف مسابقة «${CW.week_label||'بلا وسم'}» نهائياً؟ تنمسح بترشيحاتها وأصواتها، ويختفي أي تتويج مرتبط بها من الرئيسية.`))return;
+  const {error}=await sb.from('weekly_contest').delete().eq('id',CW.id);
+  if(error){toast('فشل الحذف: '+error.message,true);return}
+  toast('انحذفت المسابقة 🗑️');
+  await loadAdmWeek();await loadWeek();
+}
+
+async function admClearBadges(pid){
+  if(!confirm('تصفير كل أصوات الأوسمة على الصورة #'+pid+'؟'))return;
+  const {error}=await sb.from('badge_votes').delete().eq('photo_id',pid);
+  if(error){toast('فشل المسح: '+error.message,true);return}
+  toast('انصفرت أوسمة الصورة 🗳️');
+  await loadPhotos();openAdmin();
 }
