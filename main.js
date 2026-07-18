@@ -23,23 +23,20 @@ function go(p){
   initSelects();fillAddCities();
   // الدخول بالخلفية — والمحتوى العام يتحمل فوراً بالتوازي
   const authP=ensureAuth().then(()=>{checkAdmin();loadFavs();}).catch(e=>toast('تعذر الاتصال بالحساب',true));
+  // 🚧 فحص الصيانة أولاً — الزائر المحجوب لا يتحمّل له محتوى أصلاً
+  const mt=await sb.from('site_banner').select('maintenance,maintenance_msg').eq('id',1).maybeSingle().then(r=>r.data,()=>null);
+  if(mt&&mt.maintenance){
+    await authP; // ننتظر حكم هوية المشرف فقط
+    if(!IS_ADMIN){showMaintenance(mt.maintenance_msg);return}
+    const chip=document.createElement('div');
+    chip.style.cssText='position:fixed;top:10px;left:10px;z-index:9000;background:#FFF4D6;border:1.5px solid var(--star);border-radius:12px;padding:6px 13px;font-size:11.5px;font-weight:700;color:#A87500;box-shadow:0 2px 8px rgba(0,0,0,.15)';
+    chip.textContent='🚧 وضع الصيانة مفعل — الزوار محجوبون';
+    document.body.appendChild(chip);
+  }
   try{await Promise.all([loadPlaces(),loadPhotos()]);
   loadWeek();loadSponsor();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}
   await authP;
-  // 🚧 وضع الصيانة — يحجب الزوار ويستثني المشرف
-  try{
-    const r=await sb.from('site_banner').select('maintenance,maintenance_msg').eq('id',1).maybeSingle();
-    if(r.data&&r.data.maintenance){
-      if(!IS_ADMIN)showMaintenance(r.data.maintenance_msg);
-      else{
-        const chip=document.createElement('div');
-        chip.style.cssText='position:fixed;top:10px;left:10px;z-index:9000;background:#FFF4D6;border:1.5px solid var(--star);border-radius:12px;padding:6px 13px;font-size:11.5px;font-weight:700;color:#A87500;box-shadow:0 2px 8px rgba(0,0,0,.15)';
-        chip.textContent='🚧 وضع الصيانة مفعل — الزوار محجوبون';
-        document.body.appendChild(chip);
-      }
-    }
-  }catch(e){}
 })();
 
 function showMaintenance(msg){
