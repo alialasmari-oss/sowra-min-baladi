@@ -31,7 +31,7 @@ function go(p){
     if(!IS_ADMIN)return; // الزائر يبقى خلف الستارة
     hideMaintenance(); // المشرف: ترتفع له وحده ويكمل
     const chip=document.createElement('div');
-    chip.style.cssText='position:fixed;top:10px;left:10px;z-index:9000;background:#FFF4D6;border:1.5px solid var(--star);border-radius:12px;padding:6px 13px;font-size:11.5px;font-weight:700;color:#A87500;box-shadow:0 2px 8px rgba(0,0,0,.15)';
+    chip.className='maint-chip';
     chip.textContent='🚧 وضع الصيانة مفعل — الزوار محجوبون';
     document.body.appendChild(chip);
   }
@@ -43,17 +43,18 @@ function go(p){
 
 function showMaintenance(msg){
   if($('maintScreen'))return;
+  document.body.style.overflow='hidden';
   const d=document.createElement('div');
   d.id='maintScreen';
-  d.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:Tajawal';
-  d.innerHTML=`
-    <div style="height:16px;width:100%;position:absolute;top:0;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='16' viewBox='0 0 128 16'%3E%3Crect width='128' height='16' fill='%23F7F1E3'/%3E%3Cpath d='M0 15 L16 2 L32 15 Z' fill='%23D63A2F' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M32 15 L48 2 L64 15 Z' fill='%232E6FB7' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M64 15 L80 2 L96 15 Z' fill='%23F2B33D' stroke='%23241F1C' stroke-width='1.6'/%3E%3Cpath d='M96 15 L112 2 L128 15 Z' fill='%232E8B57' stroke='%23241F1C' stroke-width='1.6'/%3E%3C/svg%3E\");background-repeat:repeat-x"></div>
-    <div style="font-size:64px;margin-bottom:14px">🚧</div>
-    <div style="font-family:'Reem Kufi';font-size:26px;color:var(--sadu);margin-bottom:10px">الموقع تحت التطوير</div>
-    <div style="font-size:15px;color:var(--txt-dim);line-height:2;max-width:400px">${msg?msg.replace(/</g,'&lt;'):'نجهّز لكم شيئاً أجمل — نرجع قريباً بإذن الله 🇸🇦📸'}</div>
-    <div style="margin-top:26px;font-size:12px;color:var(--sand-dim)">صورة من بلدي — عدسات أهل الديار</div>`;
+  const strip=document.createElement('div');
+  strip.className='maint-strip';
+  strip.style.backgroundImage="url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22128%22 height=%2216%22><rect width=%22128%22 height=%2216%22 fill=%22%23F7F1E3%22/><path d=%22M0 15 L16 2 L32 15 Z%22 fill=%22%23D63A2F%22 stroke=%22%23241F1C%22 stroke-width=%221.6%22/><path d=%22M32 15 L48 2 L64 15 Z%22 fill=%22%232E6FB7%22 stroke=%22%23241F1C%22 stroke-width=%221.6%22/><path d=%22M64 15 L80 2 L96 15 Z%22 fill=%22%23F2B33D%22 stroke=%22%23241F1C%22 stroke-width=%221.6%22/><path d=%22M96 15 L112 2 L128 15 Z%22 fill=%22%232E8B57%22 stroke=%22%23241F1C%22 stroke-width=%221.6%22/></svg>')";
+  d.appendChild(strip);
+  const ic=document.createElement('div');ic.className='maint-ic';ic.textContent='🚧';d.appendChild(ic);
+  const ti=document.createElement('div');ti.className='maint-title';ti.textContent='الموقع تحت التطوير';d.appendChild(ti);
+  const bo=document.createElement('div');bo.className='maint-msg';bo.textContent=msg||'نجهّز لكم شيئاً أجمل — نرجع قريباً بإذن الله 🇸🇦📸';d.appendChild(bo);
+  const fo=document.createElement('div');fo.className='maint-foot';fo.textContent='صورة من بلدي — عدسات أهل الديار';d.appendChild(fo);
   document.body.appendChild(d);
-  document.body.style.overflow='hidden';
 }
 function hideMaintenance(){
   const d=$('maintScreen');
