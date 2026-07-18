@@ -10,16 +10,19 @@ function go(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
   $('page-'+p).classList.add('on');
   $('nb-feed').classList.toggle('on',p==='feed');
+  $('nb-favs').classList.toggle('on',p==='favs');
+  $('nb-msgs').classList.toggle('on',p==='msgs');
+  $('nb-acc').classList.toggle('on',p==='acc');
+  const fb=$('fab');if(fb)fb.style.display=(p==='add')?'none':'block';
   window.scrollTo(0,0);
 }
-function goTop(){go('feed');setSort('top');$('fRegion').value='';fillCities();$('q').value='';render()}
 
 /* ============ البداية ============ */
 (async()=>{
   if(window.__BOOT_FAIL)return;
   initSelects();fillAddCities();
   // الدخول بالخلفية — والمحتوى العام يتحمل فوراً بالتوازي
-  const authP=ensureAuth().then(()=>checkAdmin()).catch(e=>toast('تعذر الاتصال بالحساب',true));
+  const authP=ensureAuth().then(()=>{checkAdmin();loadFavs();}).catch(e=>toast('تعذر الاتصال بالحساب',true));
   try{await Promise.all([loadPlaces(),loadPhotos()]);
   loadWeek();loadSponsor();}
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}

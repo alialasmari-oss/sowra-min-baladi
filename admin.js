@@ -87,11 +87,19 @@ async function loadFb(){
       <div style="font-size:14px;line-height:1.8;margin-bottom:10px">${esc(f.body)}</div>
       <div style="display:flex;gap:8px">
         ${f.status==='new'
-          ?`<button class="btn" style="font-size:12px;padding:7px 14px;background:var(--palm)" onclick="fbDone(${f.id})">✓ تم التعامل</button>`
+          ?`<button class="btn" style="font-size:12px;padding:7px 14px;background:var(--qblue)" onclick="fbReply(${f.id})">💬 رد</button>
+           <button class="btn" style="font-size:12px;padding:7px 14px;background:var(--palm)" onclick="fbDone(${f.id})">✓ تم التعامل</button>`
           :`<span style="font-size:12px;color:var(--palm);font-weight:700;padding:7px 0">✓ منتهية</span>`}
         <button class="btn" style="font-size:12px;padding:7px 14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="fbDel(${f.id})">🗑️ حذف</button>
       </div>
     </div>`).join('');
+}
+async function fbReply(id){
+  const t=prompt('اكتب رد الإدارة على الرسالة:');
+  if(t===null||!t.trim())return;
+  const {error}=await sb.from('feedback').update({reply:t.trim(),status:'done'}).eq('id',id);
+  if(error){toast('فشل الرد: '+error.message,true);return}
+  toast('انرسل الرد 💬');loadFb();
 }
 async function fbDone(id){
   const { error } = await sb.from('feedback').update({status:'done'}).eq('id',id);

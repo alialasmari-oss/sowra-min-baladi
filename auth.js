@@ -94,3 +94,28 @@ async function accSubmit(){
 }
 async function accLogout(){await sb.auth.signOut();location.reload()}
 async function admLogout(){await accLogout()}
+
+/* ====== رسائلي ====== */
+function openMsgs(){
+  go('msgs');
+  loadMyMsgs();
+}
+async function loadMyMsgs(){
+  const el=$('myMsgs');if(!el)return;
+  if(!USER){el.innerHTML='';return}
+  el.innerHTML='<div style="text-align:center;color:var(--txt-dim);padding:8px">⏳</div>';
+  try{
+    const r=await sb.from('feedback').select('*').eq('user_id',USER.id).order('created_at',{ascending:false});
+    const list=r.data||[];
+    el.innerHTML=(list.length?'<div style="font-weight:700;font-size:14px;margin-bottom:10px">سجل رسائلك:</div>':'')
+      +(list.map(m=>`
+      <div class="msg-card">
+        <div class="mk">
+          <span>${(typeof FB_AR!=='undefined'&&FB_AR[m.kind])||m.kind} · ${new Date(m.created_at).toLocaleDateString('ar-SA')}</span>
+          <span class="msg-st ${m.status==='new'?'new':'done'}">${m.status==='new'?'⏳ قيد المراجعة':'✅ تمت المعالجة'}</span>
+        </div>
+        <div class="mb">${esc(m.body)}</div>
+        ${m.reply?`<div class="msg-reply"><b>رد الإدارة:</b><br>${esc(m.reply)}</div>`:''}
+      </div>`).join('')||'<div class="empty" style="padding:18px">ما أرسلت رسائل بعد</div>');
+  }catch(e){el.innerHTML='<div class="empty" style="padding:14px">نفّذ سكربت v15 لعرض السجل</div>'}
+}
