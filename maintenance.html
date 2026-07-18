@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الموقع تحت التطوير — صورة من بلدي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F1E3;--card:#fff;--sadu:#D63A2F;--ink:#241F1C;--dim:#6B6259;--line:#D9CDB4;--star:#E8A020}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.strip{position:fixed;top:0;left:0;height:16px;width:100%;background-repeat:repeat-x;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="16"><rect width="128" height="16" fill="%23F7F1E3"/><path d="M0 15 L16 2 L32 15 Z" fill="%23D63A2F" stroke="%23241F1C" stroke-width="1.6"/><path d="M32 15 L48 2 L64 15 Z" fill="%232E6FB7" stroke="%23241F1C" stroke-width="1.6"/><path d="M64 15 L80 2 L96 15 Z" fill="%23F2B33D" stroke="%23241F1C" stroke-width="1.6"/><path d="M96 15 L112 2 L128 15 Z" fill="%232E8B57" stroke="%23241F1C" stroke-width="1.6"/></svg>')}
+.ic{font-size:70px;margin-bottom:16px}
+h1{font-family:'Reem Kufi',sans-serif;font-size:28px;color:var(--sadu);margin-bottom:12px}
+.msg{font-size:15.5px;color:var(--dim);line-height:2.1;max-width:420px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px 20px}
+.foot{margin-top:28px;font-size:12.5px;color:var(--dim)}
+.logo{font-family:'Reem Kufi',sans-serif;color:var(--sadu);font-size:17px}
+</style>
+</head>
+<body>
+<div class="strip"></div>
+<div class="ic">🚧</div>
+<h1>الموقع تحت التطوير</h1>
+<div class="msg" id="msg">نجهّز لكم شيئاً أجمل — نرجع قريباً بإذن الله 🇸🇦📸</div>
+<div class="foot"><span class="logo">صورة من بلدي</span><br>عدسات أهل الديار</div>
+<script>
+(async()=>{
+  try{
+    const U="https://gquzjaxpqeggknhipmzk.supabase.co", K="sb_publishable_BNp6Fg3VLXa1Pf4V6QjncQ_f496PquX";
+    const r=await fetch(U+"/rest/v1/site_banner?id=eq.1&select=maintenance,maintenance_msg",{headers:{apikey:K,Authorization:"Bearer "+K}});
+    const d=await r.json();
+    if(!d||!d[0]||d[0].maintenance===undefined) return; // شك = ابقَ هنا
+    if(d[0].maintenance===false){ location.replace("index.html"); return; }
+    // الصيانة مفعلة: اعرض الرسالة المخصصة إن وُجدت
+    const msg=d[0].maintenance_msg;
+    if(msg&&msg.trim()) document.getElementById("msg").textContent=msg;
+  }catch(e){} // انقطاع شبكة = ابقَ بصفحة الصيانة
+})();
+</script>
+</body>
+</html>

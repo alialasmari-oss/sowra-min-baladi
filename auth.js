@@ -4,9 +4,10 @@ let IS_ADMIN=false,admTab='rep';
 let admPhotos=[],admReps={};
 
 async function checkAdmin(){
-  if(!USER||USER.is_anonymous){IS_ADMIN=false;$('admGear').style.display='none';return false}
+  if(!USER||USER.is_anonymous){IS_ADMIN=false;try{localStorage.removeItem('sowra_admin')}catch(e){}$('admGear').style.display='none';return false}
   const { data } = await sb.from('admins').select('id').maybeSingle();
   IS_ADMIN=!!data;
+  try{IS_ADMIN?localStorage.setItem('sowra_admin','1'):localStorage.removeItem('sowra_admin')}catch(e){}
   $('admGear').style.display=IS_ADMIN?'block':'none';
   return IS_ADMIN;
 }
