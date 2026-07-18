@@ -214,3 +214,19 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .acc-footer a:hover{color:var(--sadu)}
 .acc-footer span{margin:0 6px}
 .acc-copy{margin-top:10px;font-size:11px;color:var(--sand-dim)}
+
+/* ====== الخريطة التفاعلية ====== */
+#mapWrap{position:relative;margin-top:4px}
+#map{height:62vh;min-height:380px;border-radius:16px;border:2px solid var(--ink);box-shadow:0 4px 14px rgba(36,31,28,.15);z-index:1}
+.pmark{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);background:var(--card)}
+.pmark img{width:100%;height:100%;object-fit:cover}
+#mapSponsor{position:absolute;bottom:14px;right:14px;z-index:500;max-width:44%}
+#mapSponsor img{width:100%;border-radius:12px;border:1.5px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.3);display:block}
+.sort-tabs{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+.sort-tabs::-webkit-scrollbar{display:none}
+.sort-tab{white-space:nowrap;flex:0 0 auto}
+/* ====== صفحة الرعاة ====== */
+.sp-main{background:var(--card);border:2px solid var(--star);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.sp-main img{width:100%;aspect-ratio:4/1;object-fit:cover;display:block}
+.sp-main .t{padding:10px 14px;font-weight:700;font-size:13.5px;text-align:center}
+.sp-cta{background:linear-gradient(135deg,#FFF7E0,var(--card));border:1.5px dashed var(--star);border-radius:16px;padding:16px;font-size:13px;line-height:2;text-align:center;color:var(--txt)}

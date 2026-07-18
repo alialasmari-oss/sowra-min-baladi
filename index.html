@@ -13,12 +13,14 @@
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icon-512.png">
-<link rel="manifest" href="manifest.json?x=m12">
+<link rel="manifest" href="manifest.json?x=m14">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="supabase.js?x=m12"></script>
-<link rel="stylesheet" href="style.css?x=m12">
+<script src="supabase.js?x=m14"></script>
+<script src="leaflet.js?x=m14"></script>
+<link rel="stylesheet" href="style.css?x=m14">
+<link rel="stylesheet" href="leaflet.css?x=m14">
 </head>
 <body>
 
@@ -70,10 +72,16 @@
       <div class="sort-tab on" id="tabTop" onclick="setSort('top')">⭐ الأعلى تقييماً</div>
       <div class="sort-tab" id="tabNew" onclick="setSort('new')">🕐 الأحدث</div>
       <div class="sort-tab" id="tabAbroad" onclick="setSort('abroad')">🌍 عدسة مسافر</div>
+      <div class="sort-tab" id="tabMap" onclick="setSort('map')">🗺️ الخريطة</div>
+      <div class="sort-tab" onclick="openSponsorsPage()">🤝 الرعاة</div>
     </div>
     <div id="abroadHint" style="display:none;background:var(--card);border:1.5px dashed var(--qblue);border-radius:14px;padding:11px 14px;font-size:12.5px;color:var(--txt-dim);line-height:1.8;text-align:center">🌍 <b style="color:var(--qblue)">عدسة مسافر</b> — إذا كنت مسافراً خارج السعودية، نستقبل هنا لقطاتك من حول العالم بعيون أهل الديار. أما صور مناطق المملكة فمكانها الساحة الرئيسية 🇸🇦</div>
   </div>
-  <div class="feed" id="feed"><div class="loader">⏳ نحمّل الصور...</div></div>
+  <div id="mapWrap" style="display:none">
+      <div id="map"></div>
+      <div id="mapSponsor"></div>
+    </div>
+    <div class="feed" id="feed"><div class="loader">⏳ نحمّل الصور...</div></div>
 </div>
 
 <div class="page" id="page-add">
@@ -173,6 +181,17 @@
 </div>
 
 <!-- ====== الحساب ====== -->
+<!-- ====== صفحة الرعاة ====== -->
+<div class="page" id="page-sponsors">
+  <div class="form">
+    <h2>🤝 رعاتنا</h2>
+    <p class="hint">شركاء يدعمون عدسات أهل الديار</p>
+    <div id="spListPage"></div>
+    <div class="sp-cta">🌟 <b>كن راعياً لصورة من بلدي</b><br>بنر برأس الصفحة، حضور على الخريطة التفاعلية، ومسابقة أسبوعية باسم علامتك تصل لعشاق التصوير في كل المناطق.<br>للتواصل: صفحة حسابي ← 📨 راسل الإدارة</div>
+    <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="go('feed')">→ رجوع للصور</button>
+  </div>
+</div>
+
 <!-- ====== صفحة لقطة الأسبوع ====== -->
 <div class="page" id="page-week">
   <div class="form">
@@ -306,14 +325,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?x=m12"></script>
-<script src="places.js?x=m12"></script>
-<script src="capture.js?x=m12"></script>
-<script src="photos.js?x=m12"></script>
-<script src="week.js?x=m12"></script>
-<script src="upload.js?x=m12"></script>
-<script src="auth.js?x=m12"></script>
-<script src="admin.js?x=m12"></script>
-<script src="main.js?x=m12"></script>
+<script src="app.js?x=m14"></script>
+<script src="places.js?x=m14"></script>
+<script src="capture.js?x=m14"></script>
+<script src="photos.js?x=m14"></script>
+<script src="week.js?x=m14"></script>
+<script src="upload.js?x=m14"></script>
+<script src="auth.js?x=m14"></script>
+<script src="admin.js?x=m14"></script>
+<script src="main.js?x=m14"></script>
 </body>
 </html>

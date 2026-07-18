@@ -59,12 +59,16 @@ function setSort(m){
   $('tabTop').classList.toggle('on',m==='top');
   $('tabNew').classList.toggle('on',m==='new');
   $('tabAbroad').classList.toggle('on',m==='abroad');
+  $('tabMap').classList.toggle('on',m==='map');
   $('abroadHint').style.display=m==='abroad'?'block':'none';
   render();
 }
 
 function render(){
   const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
+  if(sortMode==='map'){renderMap();return}
+  const mw=$('mapWrap');if(mw)mw.style.display='none';
+  $('feed').style.display='';
   const abroadView=sortMode==='abroad';
   let list=photos.filter(p=>!!p.abroad===abroadView);
   if(catFilter!=='all')list=list.filter(p=>(p.category||'other')===catFilter);
@@ -80,7 +84,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م12`;
+  $('totalPill').textContent=`${photos.length} صورة · م14`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -255,3 +259,33 @@ function lbScaleBy(f){
   $('lbImg').style.width=lbW+'%';
 }
 function lbDbl(){lbW=lbW>100?100:250;$('lbImg').style.width=lbW+'%';}
+
+/* ====== الخريطة التفاعلية ====== */
+let MAP=null,MARKS=null;
+function renderMap(){
+  const wrap=$('mapWrap');
+  wrap.style.display='block';$('feed').style.display='none';
+  if(typeof L==='undefined'){wrap.innerHTML='<div class="empty">⚠️ تعذر تحميل الخريطة — تأكد من رفع leaflet.js وleaflet.css</div>';return}
+  if(!MAP){
+    MAP=L.map('map',{zoomControl:true,attributionControl:true}).setView([23.9,45.1],5);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(MAP);
+    MARKS=L.layerGroup().addTo(MAP);
+  }
+  MARKS.clearLayers();
+  const q=($('q').value||'').trim();
+  const list=photos.filter(p=>p.lat&&p.lng
+    &&(catFilter==='all'||(p.category||'other')===catFilter)
+    &&(!q||p.title.includes(q)||(p.village||'').includes(q)||(p.city||'').includes(q)||(p.country||'').includes(q)));
+  const pts=[];
+  list.forEach(p=>{
+    const ic=L.divIcon({className:'',html:`<div class="pmark"><img src="${thumbUrl(p.image_path)}" onerror="this.onerror=null;this.src='${imgUrl(p.image_path)}'"></div>`,iconSize:[46,46],iconAnchor:[23,23]});
+    L.marker([p.lat,p.lng],{icon:ic}).addTo(MARKS).on('click',()=>openSheet(p.id));
+    pts.push([p.lat,p.lng]);
+  });
+  if(pts.length)MAP.fitBounds(pts,{padding:[46,46],maxZoom:12});
+  setTimeout(()=>MAP.invalidateSize(),120);
+  const sp=window.__SPDATA;
+  $('mapSponsor').innerHTML=(sp&&sp.active&&sp.image_path)
+    ?((sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener">`:'')+`<img src="${imgUrl(sp.image_path)}" alt="راعي المنصة">`+(sp.link_url?'</a>':''))
+    :'';
+}

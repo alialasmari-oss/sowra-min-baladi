@@ -81,6 +81,7 @@ async function loadSponsor(){
   try{
     const r=await sb.from('site_banner').select('*').eq('id',1).maybeSingle();
     const b=r.data;
+    window.__SPDATA=b||null;
     if(!b||!b.active||!b.image_path){el.style.display='none';return}
     const src=imgUrl(b.image_path);
     el.innerHTML=(b.link_url?`<a href="${esc(b.link_url)}" target="_blank" rel="noopener">`:'')
@@ -89,4 +90,13 @@ async function loadSponsor(){
       +`<span class="sp-tag">راعي المنصة</span>`;
     el.style.display='block';
   }catch(e){el.style.display='none'}
+}
+
+/* ====== صفحة الرعاة ====== */
+function openSponsorsPage(){
+  go('sponsors');
+  const sp=window.__SPDATA;
+  $('spListPage').innerHTML=(sp&&sp.active&&sp.image_path)
+    ?`<div class="sp-main">${sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener">`:''}<img src="${imgUrl(sp.image_path)}" alt="الراعي الرسمي">${sp.link_url?'</a>':''}<div class="t">⭐ الراعي الرسمي للمنصة</div></div>`
+    :`<div class="empty" style="padding:26px 14px">🌟 مقعد الراعي الرسمي بانتظار علامتك</div>`;
 }
