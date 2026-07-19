@@ -316,7 +316,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 @media(max-width:360px){.su-filter span:last-of-type{display:none}}
 
 /* ====== Masonry Grid ====== */
-#feed{column-count:4;column-gap:8px;display:block}
+#feed{column-gap:8px;display:block}
 .mcard{break-inside:avoid;margin-bottom:8px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;display:block}
 .mcard img{width:100%;display:block;transition:transform .3s}
 .mcard:active img{transform:scale(1.02)}
@@ -328,5 +328,9 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 @media(hover:none){.mc-overlay{opacity:0}.mcard.tapped .mc-overlay{opacity:1}}
 
 
-@media(max-width:600px){#feed{column-count:2}}
-@media(max-width:900px){#feed{column-count:3}}
+@media(max-width:600px){#feed{column-gap:8px;display:block}}
+@media(max-width:900px){#feed{column-gap:8px;display:block}}
+
+#feed{column-count:2}
+@media(min-width:600px){#feed{column-count:3}}
+@media(min-width:1000px){#feed{column-count:4}}
