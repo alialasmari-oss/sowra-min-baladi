@@ -163,7 +163,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م38`;
+  $('totalPill').textContent=`${photos.length} صورة · م39`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -425,4 +425,21 @@ function addUserPin(lat,lng){
   if(_userPin)_userPin.remove();
   const ic=L.divIcon({className:'',html:'<div class="user-pin">📍<div class="user-pin-label">موقعي</div></div>',iconSize:[40,52],iconAnchor:[20,52]});
   _userPin=L.marker([lat,lng],{icon:ic,zIndexOffset:2000}).addTo(MAP);
+}
+
+/* ====== تبديل العرض ====== */
+function setView(v){
+  $('vtGrid').classList.toggle('on',v==='grid');
+  $('vtMap').classList.toggle('on',v==='map');
+  if(v==='map'){
+    sortMode='map';
+    $('mapWrap').style.display='block';
+    $('feed').style.display='none';
+    renderMap();
+  } else {
+    if(sortMode==='map') sortMode='top';
+    $('mapWrap').style.display='none';
+    $('feed').style.display='';
+    render();
+  }
 }

@@ -37,14 +37,14 @@
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icon-512.png">
-<link rel="manifest" href="manifest.json?x=m38">
+<link rel="manifest" href="manifest.json?x=m39">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="supabase.js?x=m38"></script>
-<script src="leaflet.js?x=m38"></script>
-<link rel="stylesheet" href="style.css?x=m38">
-<link rel="stylesheet" href="leaflet.css?x=m38">
+<script src="supabase.js?x=m39"></script>
+<script src="leaflet.js?x=m39"></script>
+<link rel="stylesheet" href="style.css?x=m39">
+<link rel="stylesheet" href="leaflet.css?x=m39">
 </head>
 <body>
 
@@ -79,7 +79,11 @@
   <div class="filters">
     <div class="filter-bar">
       <div class="search-box">🔎<input id="q" placeholder="ابحث باسم القرية أو المكان..." oninput="render()"></div>
-      <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">⚙️ فلتر<span id="filterBadge" class="f-badge" style="display:none">●</span></button>
+      <div class="view-toggle">
+        <button class="vt-btn on" id="vtGrid" onclick="setView('grid')" title="شبكة">⊞</button>
+        <button class="vt-btn" id="vtMap" onclick="setView('map')" title="خريطة">🗺️</button>
+      </div>
+      <button class="filter-btn" id="filterBtn" onclick="toggleFilter()">⚙️<span id="filterBadge" class="f-badge" style="display:none">●</span></button>
     </div>
     <div class="filter-drawer" id="filterDrawer" style="display:none">
       <div class="fd-section">
@@ -108,7 +112,7 @@
           <button class="fd-chip on" data-s="top" onclick="fdSetSort(this,'top')">⭐ الأعلى</button>
           <button class="fd-chip" data-s="new" onclick="fdSetSort(this,'new')">🕐 الأحدث</button>
           <button class="fd-chip" data-s="abroad" onclick="fdSetSort(this,'abroad')">🌍 عدسة مسافر</button>
-          <button class="fd-chip" data-s="map" onclick="fdSetSort(this,'map')">🗺️ الخريطة</button>
+
           <button class="fd-chip" id="fdSponsorsBtn" style="display:none" onclick="applyFilter();openSponsorsPage()">🤝 الرعاة</button>
         </div>
       </div>
@@ -409,14 +413,14 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?x=m38"></script>
-<script src="places.js?x=m38"></script>
-<script src="capture.js?x=m38"></script>
-<script src="photos.js?x=m38"></script>
-<script src="week.js?x=m38"></script>
-<script src="upload.js?x=m38"></script>
-<script src="auth.js?x=m38"></script>
-<script src="admin.js?x=m38"></script>
-<script src="main.js?x=m38"></script>
+<script src="app.js?x=m39"></script>
+<script src="places.js?x=m39"></script>
+<script src="capture.js?x=m39"></script>
+<script src="photos.js?x=m39"></script>
+<script src="week.js?x=m39"></script>
+<script src="upload.js?x=m39"></script>
+<script src="auth.js?x=m39"></script>
+<script src="admin.js?x=m39"></script>
+<script src="main.js?x=m39"></script>
 </body>
 </html>
