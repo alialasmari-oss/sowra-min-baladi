@@ -164,24 +164,17 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م40`;
+  $('totalPill').textContent=`${photos.length} صورة · م41`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
-    const medal=((sortMode==='top'||sortMode==='abroad')&&i<3&&p.ratings_count>0)?['🥇','🥈','🥉'][i]+' ':'';
-    const tb=topBadge(p);
-    return `<div class="card" onclick="openSheet(${p.id})">
-      <div class="ph"><img src="${thumbUrl(p.image_path)}" onerror="this.onerror=null;this.src='${imgUrl(p.image_path)}'" loading="lazy" alt="${esc(p.title)}">
-        <div class="medal">${medal}${Number(p.avg_stars).toFixed(1)} ★</div>
-        ${tb?`<div class="badge-tag">${tb.label}</div>`:''}
-        <div class="loc-chip">${p.abroad?'🌍 '+esc(p.country||p.city):'📍 '+esc(p.village||p.city)}</div>
-      </div>
-      <div class="card-body">
-        <div class="card-title">${esc(p.title)}</div>
-        <div class="card-meta">
-          <span class="stars-mini">${starsTxt(p.avg_stars)} (${p.ratings_count})</span>
-          <span class="who">${rankOf(p).ic} ${esc(p.photographer)}</span>
-        </div>
+    const medal=((sortMode==='top'||sortMode==='abroad')&&i<3&&p.ratings_count>0)?['🥇','🥈','🥉'][i]:'';
+    return `<div class="mcard" onclick="openSheet(${p.id})">
+      <img src="${thumbUrl(p.image_path)}" onerror="this.onerror=null;this.src='${imgUrl(p.image_path)}'" loading="lazy" alt="${esc(p.title)}">
+      ${medal?`<div class="mc-medal">${medal}</div>`:''}
+      <div class="mc-overlay">
+        <div class="mc-title">${esc(p.title)}</div>
+        <div class="mc-sub">${rankOf(p).ic} ${esc(p.photographer)} · ${p.abroad?esc(p.country||p.city):esc(p.village||p.city)}</div>
       </div>
     </div>`;
   }).join('');

@@ -59,7 +59,7 @@ select{flex:1;background:var(--card);border:1px solid var(--line);border-radius:
 .sort-tab.on{background:var(--sadu);border-color:var(--sadu);color:#fff;font-weight:700}
 .feed{padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
 .feed .empty,.feed .loader{grid-column:1/-1}
-.card{background:var(--card);border:1.5px solid var(--line);box-shadow:0 2px 8px rgba(36,31,28,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
+/* .card legacy */
 .card:hover{transform:translateY(-3px);border-color:var(--sand-dim)}
 .card:active{transform:scale(.97)}
 .ph{position:relative;height:150px;overflow:hidden;background:var(--card2)}
@@ -314,3 +314,22 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .su-filter svg{stroke:var(--txt)}
 .f-badge{color:var(--sadu);font-size:10px;margin-right:1px}
 @media(max-width:360px){.su-filter span:last-of-type{display:none}}
+
+/* ====== Masonry Grid ====== */
+#feed{column-count:2;column-gap:8px;display:block}
+.mcard{break-inside:avoid;margin-bottom:8px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;display:block}
+.mcard img{width:100%;display:block;transition:transform .3s}
+.mcard:active img{transform:scale(1.02)}
+/* Overlay — نظيف افتراضياً، يظهر عند الـhover/tap */
+.mc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,6,.8) 0%,rgba(10,8,6,.3) 40%,transparent 70%);opacity:0;transition:opacity .25s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 10px 8px}
+.mcard:hover .mc-overlay,.mcard.tapped .mc-overlay{opacity:1}
+.mc-title{color:#fff;font-size:12px;font-weight:700;line-height:1.4;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mc-sub{color:rgba(255,255,255,.75);font-size:10.5px;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.mc-medal{position:absolute;top:8px;right:8px;font-size:16px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+/* جوال: tap بدل hover */
+@media(hover:none){
+  .mc-overlay{opacity:0}
+  .mcard.tapped .mc-overlay{opacity:1}
+}
+@media(min-width:640px){#feed{column-count:3}}
+@media(min-width:1024px){#feed{column-count:4}}

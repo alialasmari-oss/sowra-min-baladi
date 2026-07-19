@@ -41,3 +41,19 @@ function go(p){
   catch(e){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${e.message||''}</div>`}
   await authP;
 })();
+
+/* ====== Tap overlay للجوال ====== */
+document.addEventListener('click',function(e){
+  const card=e.target.closest('.mcard');
+  if(!card)return;
+  // لو الشاشة تدعم hover (ديسكتوب) — لا نحتاج tap
+  if(window.matchMedia('(hover:hover)').matches)return;
+  // أول tap يظهر الـoverlay
+  if(!card.classList.contains('tapped')){
+    document.querySelectorAll('.mcard.tapped').forEach(c=>c.classList.remove('tapped'));
+    card.classList.add('tapped');
+    e.stopPropagation();
+    return;
+  }
+  // ثاني tap يفتح الصورة (openSheet يُستدعى من onclick بالبطاقة)
+},true);
