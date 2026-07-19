@@ -88,13 +88,23 @@ async function loadSponsor(){
       +`<img src="${src}" alt="راعي المنصة">`
       +(b.link_url?'</a>':'')
       +`<span class="sp-tag">راعي المنصة</span>`;
-    el.style.display='block';
+    // sponsorBar الكبير مطفأ — البنر بصفحة الرعاة فقط
+    el.style.display='none';
     if(typeof renderSponsorSide==='function')renderSponsorSide();
   }catch(e){el.style.display='none'}
 }
 
 /* ====== صفحة الرعاة ====== */
 function openSponsorsPage(){
+  // البنر الكبير برأس الصفحة
+  const el=$('spBannerPage');
+  const spb=window.__SPDATA;
+  if(el&&spb&&spb.active&&spb.image_path){
+    el.innerHTML=(sp.link_url?`<a href="${esc(spb.link_url)}" target="_blank" rel="noopener">`:'')
+      +`<img src="${imgUrl(spb.image_path)}" style="width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:14px;border:1.5px solid var(--line);display:block" alt="راعي المنصة">`
+      +(sp.link_url?'</a>':'');
+  } else if(el){ el.innerHTML=''; }
+  
   go('sponsors');
   const sp=window.__SPDATA;
   if(sp&&sp.active&&sp.image_path){
@@ -102,7 +112,7 @@ function openSponsorsPage(){
     $('spListPage').innerHTML=`
       <div class="sp-card">
         <div class="sp-card-head">
-          ${sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener"><img src="${logo}" alt="${esc(sp.sponsor_name||'')}"></a>`:`<img src="${logo}" alt="${esc(sp.sponsor_name||'')}">`}
+          ${sp.link_url?`<a href="${esc(spb.link_url)}" target="_blank" rel="noopener"><img src="${logo}" alt="${esc(sp.sponsor_name||'')}"></a>`:`<img src="${logo}" alt="${esc(sp.sponsor_name||'')}">`}
           <div class="sp-card-info">
             <div class="sp-card-name">${esc(sp.sponsor_name||'الراعي الرسمي')}</div>
             <div class="sp-card-cat">${esc(sp.sponsor_cat||'')}</div>
