@@ -423,19 +423,19 @@ function addUserPin(lat,lng){
 }
 
 /* ====== تبديل العرض مع حفظ الحالة ====== */
-let _viewMode='grid';
+let _viewMode='map';
 function setView(v){
   _viewMode=v;
   $('vtGrid').classList.toggle('on',v==='grid');
   $('vtMap').classList.toggle('on',v==='map');
-  if(v==='map'){
+  if(v==='grid'){
      sortMode='map';
     $('mapWrap').style.display='block';
     $('feed').style.display='none';
     $('nearbyWrap').style.display='none';
     renderMap();
   } else {
-    if(sortMode==='map') sortMode=_sort||'top';
+    if(sortMode==='grid') sortMode=_sort||'top';
     $('mapWrap').style.display='none';
     $('feed').style.display='';
     render();
