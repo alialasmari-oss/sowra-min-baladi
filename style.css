@@ -328,7 +328,4 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 @media(hover:none){.mc-overlay{opacity:0}.mcard.tapped .mc-overlay{opacity:1}}
 @media(min-width:480px){#feed{column-count:2}}
 @media(min-width:700px){#feed{column-count:3}}
-@media(min-width:960px){
-  #feed{column-count:4;margin:0 calc(-1*(50vw - 550px));width:100vw;padding:0 14px;box-sizing:border-box}
-}
-@media(min-width:1200px){#feed{column-count:5}}
+@media(min-width:900px){#feed{column-count:4}}
