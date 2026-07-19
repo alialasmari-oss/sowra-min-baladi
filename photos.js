@@ -21,9 +21,10 @@ function applyFilter(){
   $('filterDrawer').style.display='none';
   $('filterBtn').classList.remove('active');
   const badge=$('filterBadge');
-  badge.style.display=(catFilter!=='all'||sortMode!=='top')?'inline':'none';
+  badge.style.display=(catFilter!=='all'||_sort!=='top')?'inline':'none';
   $('abroadHint').style.display=sortMode==='abroad'?'block':'none';
-  render();
+  // ارجع للعرض المحفوظ (شبكة أو خريطة) بدل إجبار الشبكة
+  setView(_viewMode);
 }
 function clearFilter(){
   _cat='all';_sort='top';
@@ -163,7 +164,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م39`;
+  $('totalPill').textContent=`${photos.length} صورة · م40`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -427,17 +428,20 @@ function addUserPin(lat,lng){
   _userPin=L.marker([lat,lng],{icon:ic,zIndexOffset:2000}).addTo(MAP);
 }
 
-/* ====== تبديل العرض ====== */
+/* ====== تبديل العرض مع حفظ الحالة ====== */
+let _viewMode='grid';
 function setView(v){
+  _viewMode=v;
   $('vtGrid').classList.toggle('on',v==='grid');
   $('vtMap').classList.toggle('on',v==='map');
   if(v==='map'){
     sortMode='map';
     $('mapWrap').style.display='block';
     $('feed').style.display='none';
+    $('nearbyWrap').style.display='none';
     renderMap();
   } else {
-    if(sortMode==='map') sortMode='top';
+    if(sortMode==='map') sortMode=_sort||'top';
     $('mapWrap').style.display='none';
     $('feed').style.display='';
     render();

@@ -300,8 +300,17 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 
 .sp-side-btn{background:var(--sadu);color:#fff;border:none;border-radius:10px;padding:5px 12px;font-family:'Tajawal';font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
 
-/* ====== تبديل العرض بالبار ====== */
-.view-toggle{display:flex;gap:2px;background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:3px}
-.vt-btn{background:none;border:none;border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt-dim);transition:background .15s}
-.vt-btn.on{background:var(--sadu);color:#fff}
-.filter-btn{padding:0 10px;height:38px;min-width:auto}
+
+
+/* ====== البار الموحد ====== */
+.search-unified{display:flex;align-items:center;gap:0;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:4px 6px;width:100%;box-sizing:border-box}
+.su-view{background:none;border:none;border-radius:10px;width:34px;height:34px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt-dim);flex-shrink:0;transition:background .15s}
+.su-view.on{background:var(--sadu);color:#fff}
+.su-sep{width:1px;height:22px;background:var(--line);margin:0 4px;flex-shrink:0}
+.su-input{flex:1;border:none;background:none;font-family:'Tajawal';font-size:13.5px;color:var(--txt);outline:none;padding:0 6px;direction:rtl;min-width:0}
+.su-input::placeholder{color:var(--txt-dim)}
+.su-filter{background:none;border:none;display:flex;align-items:center;gap:5px;font-family:'Tajawal';font-size:13px;font-weight:700;color:var(--txt);cursor:pointer;padding:4px 8px;border-radius:10px;flex-shrink:0;transition:background .15s}
+.su-filter:hover{background:var(--card2)}
+.su-filter svg{stroke:var(--txt)}
+.f-badge{color:var(--sadu);font-size:10px;margin-right:1px}
+@media(max-width:360px){.su-filter span:last-of-type{display:none}}
