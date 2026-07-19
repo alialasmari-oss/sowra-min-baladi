@@ -153,6 +153,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .nav-btn span{font-size:10.5px;line-height:1}
 .nav-btn.on{color:var(--sadu)}
 .nav-btn.on .nb-ic{stroke:var(--sadu)}
+.nav-btn.on::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:var(--sadu);margin:2px auto 0}
 .empty{text-align:center;padding:50px 30px;color:var(--txt-dim);font-size:14px;line-height:1.9}
 .empty .big{font-size:40px;display:block;margin-bottom:8px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--palm);color:#fff;padding:11px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:99;display:none;white-space:nowrap}
