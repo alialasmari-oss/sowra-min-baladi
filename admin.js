@@ -245,7 +245,7 @@ async function loadAdmWeek(){
       <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
         <div style="flex:1"><b style="font-size:13px">#${p.id} · ${esc(p.title)}</b></div>
         <button class="btn" style="font-size:12px;padding:7px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admWeekRemove(${p.id})">إزالة</button>
-      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock() + admSponsorSideBlock() + admMaintBlock();
+      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock() + admSponsorsBtn() + admSponsorSideBlock() + admMaintBlock();
 }
 /* ====== بنر الراعي ====== */
 async function admSpBlock(){
@@ -384,6 +384,22 @@ async function admClearBadges(pid){
 }
 
 /* ====== وضع الصيانة ====== */
+function admSponsorsBtn(){
+  const b=window.__SPB||{};
+  const on=!!b.sponsors_btn;
+  return `<div style="background:var(--card);border:1.5px solid ${on?'var(--qblue)':'var(--line)'};border-radius:14px;padding:14px;margin-top:12px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">🤝 زر الرعاة بالرئيسية <span style="font-size:11px;font-weight:700;color:${on?'var(--qblue)':'var(--txt-dim)'}">${on?'● ظاهر':'○ مخفي'}</span></div>
+    <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px">زر «🤝 الرعاة» في قائمة الفلتر.</div>
+    <button class="btn" style="width:100%;${on?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--qblue)'}" onclick="admSponsorsBtnToggle()">${on?'🙈 إخفاء الزر':'👁️ إظهار زر الرعاة'}</button>
+  </div>`;
+}
+async function admSponsorsBtnToggle(){
+  const b=window.__SPB||{};
+  const{error}=await sb.from('site_banner').update({sponsors_btn:!b.sponsors_btn}).eq('id',1);
+  if(error){toast('فشلت العملية',true);return}
+  toast(!b.sponsors_btn?'زر الرعاة ظاهر 🤝':'اختفى الزر');
+  await loadAdmWeek();renderSponsorsBtn();
+}
 function admSponsorSideBlock(){
   const b=window.__SPB||{};
   const on=!!b.side_active;

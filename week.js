@@ -91,6 +91,7 @@ async function loadSponsor(){
     // sponsorBar الكبير مطفأ — البنر بصفحة الرعاة فقط
     el.style.display='none';
     if(typeof renderSponsorSide==='function')renderSponsorSide();
+    renderSponsorsBtn();
   }catch(e){el.style.display='none'}
 }
 
@@ -123,4 +124,11 @@ function openSponsorsPage(){
   } else {
     $('spListPage').innerHTML=`<div class="empty" style="padding:26px 14px">🌟 مقعد الراعي الرسمي بانتظار علامتك</div>`;
   }
+}
+
+function renderSponsorsBtn(){
+  const btn=$('fdSponsorsBtn');
+  if(!btn)return;
+  const sp=window.__SPDATA;
+  btn.style.display=(sp&&sp.active&&sp.sponsors_btn)?'inline-block':'none';
 }
