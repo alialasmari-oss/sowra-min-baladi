@@ -398,7 +398,7 @@ async function admSponsorsBtnToggle(){
   const{error}=await sb.from('site_banner').update({sponsors_btn:!b.sponsors_btn}).eq('id',1);
   if(error){toast('فشلت العملية',true);return}
   toast(!b.sponsors_btn?'زر الرعاة ظاهر 🤝':'اختفى الزر');
-  await loadAdmWeek();renderSponsorsBtn();
+  await loadAdmWeek();await loadSponsor();
 }
 function admSponsorSideBlock(){
   const b=window.__SPB||{};

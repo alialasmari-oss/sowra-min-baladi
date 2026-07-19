@@ -82,6 +82,7 @@ async function loadSponsor(){
     const r=await sb.from('site_banner').select('*').eq('id',1).maybeSingle();
     const b=r.data;
     window.__SPDATA=b||null;
+    window.__SPB=b||{}; // مزامنة مع الترس
     if(!b||!b.active||!b.image_path||!b.side_active){el.style.display='none';return}
     const src=imgUrl(b.image_path);
     el.innerHTML=(b.link_url?`<a href="${esc(b.link_url)}" target="_blank" rel="noopener">`:'')
