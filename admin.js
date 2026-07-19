@@ -412,7 +412,6 @@ function admSponsorSideBlock(){
 }
 async function admSideBannerToggle(){
   const b=window.__SPB||{};
-  if(!b.image_path){toast('ارفع صورة للراعي أولاً 📤',true);return}
   const {error}=await sb.from('site_banner').update({side_active:!b.side_active}).eq('id',1);
   if(error){toast('فشلت العملية: '+error.message,true);return}
   toast(!b.side_active?'البطاقة ظاهرة بالرئيسية 📌':'اختفت البطاقة');
