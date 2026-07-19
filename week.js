@@ -82,7 +82,7 @@ async function loadSponsor(){
     const r=await sb.from('site_banner').select('*').eq('id',1).maybeSingle();
     const b=r.data;
     window.__SPDATA=b||null;
-    if(!b||!b.active||!b.image_path){el.style.display='none';return}
+    if(!b||!b.active||!b.image_path||!b.side_active){el.style.display='none';return}
     const src=imgUrl(b.image_path);
     el.innerHTML=(b.link_url?`<a href="${esc(b.link_url)}" target="_blank" rel="noopener">`:'')
       +`<img src="${src}" alt="راعي المنصة">`
@@ -96,30 +96,29 @@ async function loadSponsor(){
 
 /* ====== صفحة الرعاة ====== */
 function openSponsorsPage(){
+  go('sponsors');
+  const SP=window.__SPDATA;
   // البنر الكبير برأس الصفحة
   const el=$('spBannerPage');
-  const spb=window.__SPDATA;
-  if(el&&spb&&spb.active&&spb.image_path){
-    el.innerHTML=(sp.link_url?`<a href="${esc(spb.link_url)}" target="_blank" rel="noopener">`:'')
-      +`<img src="${imgUrl(spb.image_path)}" style="width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:14px;border:1.5px solid var(--line);display:block" alt="راعي المنصة">`
-      +(sp.link_url?'</a>':'');
+  if(el&&SP&&SP.active&&SP.image_path){
+    el.innerHTML=(SP.link_url?`<a href="${esc(SP.link_url)}" target="_blank" rel="noopener">`:'')
+      +`<img src="${imgUrl(SP.image_path)}" style="width:100%;aspect-ratio:4/1;object-fit:cover;border-radius:14px;border:1.5px solid var(--line);display:block" alt="راعي المنصة">`
+      +(SP.link_url?'</a>':'');
   } else if(el){ el.innerHTML=''; }
-  
-  go('sponsors');
-  const sp=window.__SPDATA;
-  if(sp&&sp.active&&sp.image_path){
-    const logo=imgUrl(sp.image_path);
+  // البطاقة التفصيلية
+  if(SP&&SP.active&&SP.image_path){
+    const logo=imgUrl(SP.image_path);
     $('spListPage').innerHTML=`
       <div class="sp-card">
         <div class="sp-card-head">
-          ${sp.link_url?`<a href="${esc(spb.link_url)}" target="_blank" rel="noopener"><img src="${logo}" alt="${esc(sp.sponsor_name||'')}"></a>`:`<img src="${logo}" alt="${esc(sp.sponsor_name||'')}">`}
+          ${SP.link_url?`<a href="${esc(SP.link_url)}" target="_blank" rel="noopener"><img src="${logo}" alt="${esc(SP.sponsor_name||'')}"></a>`:`<img src="${logo}" alt="${esc(SP.sponsor_name||'')}">`}
           <div class="sp-card-info">
-            <div class="sp-card-name">${esc(sp.sponsor_name||'الراعي الرسمي')}</div>
-            <div class="sp-card-cat">${esc(sp.sponsor_cat||'')}</div>
+            <div class="sp-card-name">${esc(SP.sponsor_name||'الراعي الرسمي')}</div>
+            <div class="sp-card-cat">${esc(SP.sponsor_cat||'')}</div>
           </div>
           <span class="sp-tag">⭐ الراعي الرسمي</span>
         </div>
-        ${sp.sponsor_deal?`<div class="sp-card-body"><div class="sp-deal">${esc(sp.sponsor_deal)}${sp.sponsor_code?`<br><span class="sp-code">${esc(sp.sponsor_code)}</span>`:''}</div></div>`:''}
+        ${SP.sponsor_deal?`<div class="sp-card-body"><div class="sp-deal">${esc(SP.sponsor_deal)}${SP.sponsor_code?`<br><span class="sp-code">${esc(SP.sponsor_code)}</span>`:''}</div></div>`:''}
       </div>`;
   } else {
     $('spListPage').innerHTML=`<div class="empty" style="padding:26px 14px">🌟 مقعد الراعي الرسمي بانتظار علامتك</div>`;

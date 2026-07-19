@@ -297,3 +297,5 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .sp-card-body{padding:0 14px 14px}
 .sp-deal{background:linear-gradient(135deg,#FFF7E0,var(--card));border:1.5px dashed var(--star);border-radius:12px;padding:10px 13px;font-size:13px;line-height:1.9}
 .sp-code{display:inline-block;background:var(--ink);color:#F7F1E3;border-radius:8px;padding:3px 12px;font-weight:700;font-size:13px;letter-spacing:1px;margin-top:4px;direction:ltr}
+
+.sp-side-btn{background:var(--sadu);color:#fff;border:none;border-radius:10px;padding:5px 12px;font-family:'Tajawal';font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}

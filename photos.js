@@ -87,9 +87,8 @@ function renderSponsorSide(){
       <div class="sp-name">${esc(sp.sponsor_name||'راعي المنصة')}</div>
       <div class="sp-cat">${esc(sp.sponsor_cat||'')}</div>
     </div>
-    <span class="sp-tag">راعي</span>`;
-  el.onclick=()=>openSponsorsPage();
-  el.style.cursor='pointer';
+    <button class="sp-side-btn" onclick="openSponsorsPage()">عروضنا ←</button>`;
+  el.style.cursor='default';
 }
 /* صورة من بلدي — photos.js | نسخة المختبر م1 */
 /* ============ الأوسمة ============ */
@@ -165,7 +164,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م27`;
+  $('totalPill').textContent=`${photos.length} صورة · م28`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{

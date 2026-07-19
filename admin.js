@@ -245,7 +245,7 @@ async function loadAdmWeek(){
       <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin-bottom:8px">
         <div style="flex:1"><b style="font-size:13px">#${p.id} · ${esc(p.title)}</b></div>
         <button class="btn" style="font-size:12px;padding:7px 12px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="admWeekRemove(${p.id})">إزالة</button>
-      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock() + admMaintBlock();
+      </div>`).join(''):'<div class="empty" style="padding:20px">ما فيه ترشيحات بعد</div>'}` + await admSpBlock() + admSponsorSideBlock() + admMaintBlock();
 }
 /* ====== بنر الراعي ====== */
 async function admSpBlock(){
@@ -384,6 +384,23 @@ async function admClearBadges(pid){
 }
 
 /* ====== وضع الصيانة ====== */
+function admSponsorSideBlock(){
+  const b=window.__SPB||{};
+  const on=!!b.side_active;
+  return `
+  <div style="background:var(--card);border:1.5px solid ${on?'var(--palm)':'var(--line)'};border-radius:14px;padding:14px;margin-top:12px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">📌 بطاقة الراعي بالرئيسية ${on?'<span style="font-size:11px;color:var(--palm);font-weight:700">● ظاهرة</span>':'<span style="font-size:11px;color:var(--txt-dim)">○ مخفية</span>'}</div>
+    <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px">البطاقة الصغيرة (الاسم + النشاط) التي تظهر فوق الصور بالرئيسية.</div>
+    <button class="btn" style="width:100%;${on?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admSideBannerToggle()">${on?'🙈 إخفاء البطاقة':'👁️ إظهار البطاقة بالرئيسية'}</button>
+  </div>`;
+}
+async function admSideBannerToggle(){
+  const b=window.__SPB||{};
+  const {error}=await sb.from('site_banner').update({side_active:!b.side_active}).eq('id',1);
+  if(error){toast('فشلت العملية',true);return}
+  toast(!b.side_active?'البطاقة ظاهرة بالرئيسية 📌':'اختفت البطاقة');
+  await loadAdmWeek();loadSponsor();
+}
 function admMaintBlock(){
   const b=window.__SPB||{};
   const on=!!b.maintenance;
