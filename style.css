@@ -320,16 +320,13 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 .mcard{break-inside:avoid;margin-bottom:8px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;display:block}
 .mcard img{width:100%;display:block;transition:transform .3s}
 .mcard:active img{transform:scale(1.02)}
-/* Overlay — نظيف افتراضياً، يظهر عند الـhover/tap */
 .mc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,6,.8) 0%,rgba(10,8,6,.3) 40%,transparent 70%);opacity:0;transition:opacity .25s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 10px 8px}
 .mcard:hover .mc-overlay,.mcard.tapped .mc-overlay{opacity:1}
 .mc-title{color:#fff;font-size:12px;font-weight:700;line-height:1.4;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .mc-sub{color:rgba(255,255,255,.75);font-size:10.5px;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .mc-medal{position:absolute;top:8px;right:8px;font-size:16px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
-/* جوال: tap بدل hover */
-@media(hover:none){
-  .mc-overlay{opacity:0}
-  .mcard.tapped .mc-overlay{opacity:1}
-}
-@media(min-width:640px){#feed{column-count:3}}
-@media(min-width:1024px){#feed{column-count:4}}
+@media(hover:none){.mc-overlay{opacity:0}.mcard.tapped .mc-overlay{opacity:1}}
+@media(min-width:480px){#feed{column-count:2}}
+@media(min-width:700px){#feed{column-count:3}}
+@media(min-width:960px){#feed{column-count:4}}
+@media(min-width:1200px){#feed{column-count:5}}
