@@ -145,8 +145,8 @@ function fillAddCities(){
 
 
 function render(){
+  if(_viewMode==='map')return;
   const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
-  if(sortMode==='map'){renderMap();return}
   const mw=$('mapWrap');if(mw)mw.style.display='none';
   $('feed').style.display='';
   const abroadView=sortMode==='abroad';
@@ -164,7 +164,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م66`;
+  $('totalPill').textContent=`${photos.length} صورة · م67`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
