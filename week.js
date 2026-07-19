@@ -77,23 +77,16 @@ async function voteWeek(pid){
 
 /* ====== بنر الراعي ====== */
 async function loadSponsor(){
-  const el=$('sponsorBar');if(!el)return;
   try{
     const r=await sb.from('site_banner').select('*').eq('id',1).maybeSingle();
-    const b=r.data;
-    window.__SPDATA=b||null;
-    window.__SPB=b||{}; // مزامنة مع الترس
-    if(!b||!b.active||!b.image_path||!b.side_active){el.style.display='none';return}
-    const src=imgUrl(b.image_path);
-    el.innerHTML=(b.link_url?`<a href="${esc(b.link_url)}" target="_blank" rel="noopener">`:'')
-      +`<img src="${src}" alt="راعي المنصة">`
-      +(b.link_url?'</a>':'')
-      +`<span class="sp-tag">راعي المنصة</span>`;
-    // sponsorBar الكبير مطفأ — البنر بصفحة الرعاة فقط
-    el.style.display='none';
+    const b=r.data||null;
+    window.__SPDATA=b;
+    window.__SPB=b||{};
+    // البطاقة الجانبية
     if(typeof renderSponsorSide==='function')renderSponsorSide();
+    // زر الرعاة
     renderSponsorsBtn();
-  }catch(e){el.style.display='none'}
+  }catch(e){}
 }
 
 /* ====== صفحة الرعاة ====== */
@@ -131,5 +124,5 @@ function renderSponsorsBtn(){
   const btn=$('fdSponsorsBtn');
   if(!btn)return;
   const sp=window.__SPDATA;
-  btn.style.display=(sp&&sp.active&&sp.sponsors_btn)?'inline-block':'none';
+  btn.style.display=(sp&&sp.sponsors_btn)?'inline-block':'none';
 }

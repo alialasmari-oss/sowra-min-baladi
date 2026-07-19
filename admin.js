@@ -390,7 +390,7 @@ function admSponsorsBtn(){
   return `<div style="background:var(--card);border:1.5px solid ${on?'var(--qblue)':'var(--line)'};border-radius:14px;padding:14px;margin-top:12px">
     <div style="font-weight:700;font-size:14px;margin-bottom:6px">🤝 زر الرعاة بالرئيسية <span style="font-size:11px;font-weight:700;color:${on?'var(--qblue)':'var(--txt-dim)'}">${on?'● ظاهر':'○ مخفي'}</span></div>
     <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px">زر «🤝 الرعاة» في قائمة الفلتر.</div>
-    <button class="btn" style="width:100%;${on?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--qblue)'}" onclick="admSponsorsBtnToggle()">${on?'🙈 إخفاء الزر':'👁️ إظهار زر الرعاة'}</button>
+    <button class="btn" style="width:100%;${on?'background:var(--sadu)':'background:var(--qblue)'}" onclick="admSponsorsBtnToggle()">${on?'🙈 إخفاء زر الرعاة':'👁️ إظهار زر الرعاة'}</button>
   </div>`;
 }
 async function admSponsorsBtnToggle(){
@@ -407,7 +407,7 @@ function admSponsorSideBlock(){
   <div style="background:var(--card);border:1.5px solid ${on?'var(--palm)':'var(--line)'};border-radius:14px;padding:14px;margin-top:12px">
     <div style="font-weight:700;font-size:14px;margin-bottom:6px">📌 بطاقة الراعي بالرئيسية ${on?'<span style="font-size:11px;color:var(--palm);font-weight:700">● ظاهرة</span>':'<span style="font-size:11px;color:var(--txt-dim)">○ مخفية</span>'}</div>
     <div style="font-size:11.5px;color:var(--txt-dim);margin-bottom:10px">البطاقة الصغيرة (الاسم + النشاط) التي تظهر فوق الصور بالرئيسية.</div>
-    <button class="btn" style="width:100%;${on?'background:var(--card2);border:1px solid var(--line);color:var(--txt)':'background:var(--palm)'}" onclick="admSideBannerToggle()">${on?'🙈 إخفاء البطاقة':'👁️ إظهار البطاقة بالرئيسية'}</button>
+    <button class="btn" style="width:100%;${on?'background:var(--sadu)':'background:var(--palm)'}" onclick="admSideBannerToggle()">${on?'🙈 إخفاء البطاقة':'👁️ إظهار البطاقة بالرئيسية'}</button>
   </div>`;
 }
 async function admSideBannerToggle(){

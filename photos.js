@@ -79,7 +79,7 @@ function closeHero(){
 function renderSponsorSide(){
   const el=$('sponsorSide');if(!el)return;
   const sp=window.__SPDATA;
-  if(!sp||!sp.active||!sp.image_path){el.style.display='none';return;}
+  if(!sp||!sp.active||!sp.image_path||!sp.side_active){el.style.display='none';return}
   const logo=imgUrl(sp.image_path);
   el.style.display='flex';
   el.innerHTML=`<img src="${logo}" alt="${esc(sp.sponsor_name||'راعي المنصة')}">
@@ -88,7 +88,6 @@ function renderSponsorSide(){
       <div class="sp-cat">${esc(sp.sponsor_cat||'')}</div>
     </div>
     <button class="sp-side-btn" onclick="openSponsorsPage()">عروضنا ←</button>`;
-  el.style.cursor='default';
 }
 /* صورة من بلدي — photos.js | نسخة المختبر م1 */
 /* ============ الأوسمة ============ */
@@ -164,7 +163,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م30`;
+  $('totalPill').textContent=`${photos.length} صورة · م31`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
