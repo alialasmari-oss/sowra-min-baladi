@@ -124,5 +124,6 @@ function renderSponsorsBtn(){
   const btn=$('fdSponsorsBtn');
   if(!btn)return;
   const sp=window.__SPDATA;
-  btn.style.display=(sp&&sp.sponsors_btn)?'inline-block':'none';
+  let spOn=false;try{spOn=localStorage.getItem('sowra_sponsors_btn')==='1';}catch(e){}
+  btn.style.display=spOn?'inline-block':'none';
 }

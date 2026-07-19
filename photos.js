@@ -79,7 +79,8 @@ function closeHero(){
 function renderSponsorSide(){
   const el=$('sponsorSide');if(!el)return;
   const sp=window.__SPDATA;
-  if(!sp||!sp.image_path||!sp.side_active){el.style.display='none';return}
+  let sideOn=false;try{sideOn=localStorage.getItem('sowra_side_banner')==='1';}catch(e){}
+  if(!sp||!sp.image_path||!sideOn){el.style.display='none';return}
   const logo=imgUrl(sp.image_path);
   el.style.display='flex';
   el.innerHTML=`<img src="${logo}" alt="${esc(sp.sponsor_name||'راعي المنصة')}">
@@ -163,7 +164,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م32`;
+  $('totalPill').textContent=`${photos.length} صورة · م34`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{

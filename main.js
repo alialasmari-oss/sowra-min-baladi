@@ -9,7 +9,10 @@ function go(p){
   if(p==='adm' && !IS_ADMIN)p='feed';
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
   $('page-'+p).classList.add('on');
-  if(p==='feed' && typeof render==='function') render();
+  if(p==='feed'){
+    if(typeof loadPhotos==='function') loadPhotos().then(()=>{if(typeof render==='function')render();});
+    else if(typeof render==='function') render();
+  }
   $('nb-feed').classList.toggle('on',p==='feed');
   $('nb-favs').classList.toggle('on',p==='favs');
   $('nb-msgs').classList.toggle('on',p==='msgs');
