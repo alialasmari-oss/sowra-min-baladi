@@ -79,17 +79,16 @@ function closeHero(){
 function renderSponsorSide(){
   const el=$('sponsorSide');if(!el)return;
   const sp=window.__SPDATA;
-  let sideOn=false;try{sideOn=localStorage.getItem('sowra_side_banner')==='1';}catch(e){}
-  if(!sp||!sp.image_path||!sideOn){el.style.display='none';return}
-  const logo=imgUrl(sp.image_path);
+  if(!sp||!sp.image_path||!sp.side_active){el.style.display='none';return}
   el.style.display='flex';
-  el.innerHTML=`<img src="${logo}" alt="${esc(sp.sponsor_name||'راعي المنصة')}">
+  el.innerHTML=`<img src="${imgUrl(sp.image_path)}" alt="${esc(sp.sponsor_name||'')}">
     <div class="sp-info">
       <div class="sp-name">${esc(sp.sponsor_name||'راعي المنصة')}</div>
       <div class="sp-cat">${esc(sp.sponsor_cat||'')}</div>
     </div>
     <button class="sp-side-btn" onclick="openSponsorsPage()">عروضنا ←</button>`;
 }
+
 /* صورة من بلدي — photos.js | نسخة المختبر م1 */
 /* ============ الأوسمة ============ */
 const BADGES = [
@@ -164,7 +163,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م34`;
+  $('totalPill').textContent=`${photos.length} صورة · م35`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{

@@ -121,9 +121,7 @@ function openSponsorsPage(){
 }
 
 function renderSponsorsBtn(){
-  const btn=$('fdSponsorsBtn');
-  if(!btn)return;
+  const btn=$('fdSponsorsBtn');if(!btn)return;
   const sp=window.__SPDATA;
-  let spOn=false;try{spOn=localStorage.getItem('sowra_sponsors_btn')==='1';}catch(e){}
-  btn.style.display=spOn?'inline-block':'none';
+  btn.style.display=(sp&&sp.sponsors_btn)?'inline-block':'none';
 }
