@@ -37,14 +37,14 @@
 <meta property="og:description" content="عدسات أهل الديار — شارك أجمل صور منطقتك وخلّ الناس تقيّم">
 <meta property="og:type" content="website">
 <meta property="og:image" content="icon-512.png">
-<link rel="manifest" href="manifest.json?x=m24">
+<link rel="manifest" href="manifest.json?x=m25">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="supabase.js?x=m24"></script>
-<script src="leaflet.js?x=m24"></script>
-<link rel="stylesheet" href="style.css?x=m24">
-<link rel="stylesheet" href="leaflet.css?x=m24">
+<script src="supabase.js?x=m25"></script>
+<script src="leaflet.js?x=m25"></script>
+<link rel="stylesheet" href="style.css?x=m25">
+<link rel="stylesheet" href="leaflet.css?x=m25">
 </head>
 <body>
 
@@ -263,7 +263,17 @@
     <h2>🤝 رعاتنا</h2>
     <p class="hint">شركاء يدعمون عدسات أهل الديار</p>
     <div id="spListPage"></div>
-    <div class="sp-cta">🌟 <b>كن راعياً لصورة من بلدي</b><br>بنر برأس الصفحة، حضور على الخريطة التفاعلية، ومسابقة أسبوعية باسم علامتك تصل لعشاق التصوير في كل المناطق.<br>للتواصل: صفحة حسابي ← 📨 راسل الإدارة</div>
+    <div class="sp-cta">
+      <div style="font-size:18px;margin-bottom:8px">🌟</div>
+      <b>كن راعياً لصورة من بلدي</b>
+      <div style="font-size:13px;color:var(--txt-dim);margin-top:8px;line-height:1.9">
+        ✅ دبوس على الخريطة التفاعلية<br>
+        ✅ بطاقة جانبية بكل الصفحات<br>
+        ✅ تصدّر مسابقة أسبوعية باسمك<br>
+        ✅ حضور دائم بصفحة الرعاة
+      </div>
+      <div style="margin-top:12px;font-size:13px">للتواصل: صفحة حسابي ← 📨 راسل الإدارة</div>
+    </div>
     <button class="btn" style="width:100%;margin-top:14px;background:var(--card2);border:1px solid var(--line);color:var(--txt)" onclick="go('feed')">→ رجوع للصور</button>
   </div>
 </div>
@@ -376,23 +386,35 @@
 </div>
 
 <nav>
-  <button class="nav-btn on" id="nb-feed" onclick="go('feed')"><span class="ic">🏞️</span>الصور</button>
-  <button class="nav-btn" id="nb-favs" onclick="openFavs()"><span class="ic">❤️</span>المفضلة</button>
-  <button class="nav-btn" id="nb-msgs" onclick="openMsgs()"><span class="ic">📨</span>رسائلي</button>
-  <button class="nav-btn" id="nb-acc" onclick="openAcc()"><span class="ic">👤</span>حسابي</button>
+  <button class="nav-btn on" id="nb-feed" onclick="go('feed')">
+    <svg class="nb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>الصور</span>
+  </button>
+  <button class="nav-btn" id="nb-favs" onclick="openFavs()">
+    <svg class="nb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <span>المفضلة</span>
+  </button>
+  <button class="nav-btn" id="nb-msgs" onclick="openMsgs()">
+    <svg class="nb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>رسائلي</span>
+  </button>
+  <button class="nav-btn" id="nb-acc" onclick="openAcc()">
+    <svg class="nb-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>حسابي</span>
+  </button>
 </nav>
 <button id="fab" onclick="go('add')" title="انشر صورة">+</button>
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js?x=m24"></script>
-<script src="places.js?x=m24"></script>
-<script src="capture.js?x=m24"></script>
-<script src="photos.js?x=m24"></script>
-<script src="week.js?x=m24"></script>
-<script src="upload.js?x=m24"></script>
-<script src="auth.js?x=m24"></script>
-<script src="admin.js?x=m24"></script>
-<script src="main.js?x=m24"></script>
+<script src="app.js?x=m25"></script>
+<script src="places.js?x=m25"></script>
+<script src="capture.js?x=m25"></script>
+<script src="photos.js?x=m25"></script>
+<script src="week.js?x=m25"></script>
+<script src="upload.js?x=m25"></script>
+<script src="auth.js?x=m25"></script>
+<script src="admin.js?x=m25"></script>
+<script src="main.js?x=m25"></script>
 </body>
 </html>

@@ -97,7 +97,21 @@ async function loadSponsor(){
 function openSponsorsPage(){
   go('sponsors');
   const sp=window.__SPDATA;
-  $('spListPage').innerHTML=(sp&&sp.active&&sp.image_path)
-    ?`<div class="sp-main">${sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener">`:''}<img src="${imgUrl(sp.image_path)}" alt="الراعي الرسمي">${sp.link_url?'</a>':''}<div class="t">⭐ الراعي الرسمي للمنصة</div></div>`
-    :`<div class="empty" style="padding:26px 14px">🌟 مقعد الراعي الرسمي بانتظار علامتك</div>`;
+  if(sp&&sp.active&&sp.image_path){
+    const logo=imgUrl(sp.image_path);
+    $('spListPage').innerHTML=`
+      <div class="sp-card">
+        <div class="sp-card-head">
+          ${sp.link_url?`<a href="${esc(sp.link_url)}" target="_blank" rel="noopener"><img src="${logo}" alt="${esc(sp.sponsor_name||'')}"></a>`:`<img src="${logo}" alt="${esc(sp.sponsor_name||'')}">`}
+          <div class="sp-card-info">
+            <div class="sp-card-name">${esc(sp.sponsor_name||'الراعي الرسمي')}</div>
+            <div class="sp-card-cat">${esc(sp.sponsor_cat||'')}</div>
+          </div>
+          <span class="sp-tag">⭐ الراعي الرسمي</span>
+        </div>
+        ${sp.sponsor_deal?`<div class="sp-card-body"><div class="sp-deal">${esc(sp.sponsor_deal)}${sp.sponsor_code?`<br><span class="sp-code">${esc(sp.sponsor_code)}</span>`:''}</div></div>`:''}
+      </div>`;
+  } else {
+    $('spListPage').innerHTML=`<div class="empty" style="padding:26px 14px">🌟 مقعد الراعي الرسمي بانتظار علامتك</div>`;
+  }
 }
