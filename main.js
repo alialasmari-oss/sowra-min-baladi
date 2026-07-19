@@ -13,6 +13,13 @@ function go(p){
     if(typeof loadPhotos==='function') loadPhotos().then(()=>{if(typeof render==='function')render();});
     else if(typeof render==='function') render();
   }
+  // أغلق الترس إذا كان مفتوحاً
+  if(p==='feed'){
+    const adm=$('page-adm');
+    if(adm&&adm.classList.contains('on')){
+      adm.classList.remove('on');
+    }
+  }
   $('nb-feed').classList.toggle('on',p==='feed');
   $('nb-favs').classList.toggle('on',p==='favs');
   $('nb-msgs').classList.toggle('on',p==='msgs');
