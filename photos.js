@@ -121,7 +121,8 @@ async function loadPhotos(){
   const { data, error } = await sb.from('photos_ranked').select('*');
   if(error){$('feed').innerHTML=`<div class="empty"><span class="big">⚠️</span>تعذر تحميل الصور<br>${error.message}</div>`;return}
   photos = data || [];
-  render();
+  if(typeof _viewMode!=='undefined'&&_viewMode==='map'){renderMap();}
+  else{render();}
 }
 
 /* ============ الفلاتر والعرض ============ */
@@ -145,7 +146,6 @@ function fillAddCities(){
 
 
 function render(){
-  console.log('[render] _viewMode='+_viewMode+' sortMode='+sortMode+' feed.display='+($('feed')?$('feed').style.display:'?')+' mapWrap.display='+($('mapWrap')?$('mapWrap').style.display:'?'));
   if(_viewMode==='map'){console.log('[render] وضع الخريطة — توقف');return;}
   const q=$('q').value.trim(), r=$('fRegion').value, c=$('fCity').value;
   const mw=$('mapWrap');if(mw)mw.style.display='none';
@@ -165,7 +165,7 @@ function render(){
       ?(b.avg_stars-a.avg_stars)||(b.ratings_count-a.ratings_count)
       :new Date(b.created_at)-new Date(a.created_at));
   }
-  $('totalPill').textContent=`${photos.length} صورة · م68`;
+  $('totalPill').textContent=`${photos.length} صورة · م69`;
   const feed=$('feed');
   if(!list.length){feed.innerHTML=`<div class="empty"><span class="big">🏜️</span>ما فيه صور بعد..<br>كن أول من يصوّر ديرته! اضغط + وشارك</div>`;return}
   feed.innerHTML=list.map((p,i)=>{
@@ -425,7 +425,6 @@ function addUserPin(lat,lng){
 /* ====== تبديل العرض مع حفظ الحالة ====== */
 let _viewMode='grid';
 function setView(v){
-  console.log('[setView] v='+v);
   _viewMode=v;
   $('vtGrid').classList.toggle('on',v==='grid');
   $('vtMap').classList.toggle('on',v==='map');
