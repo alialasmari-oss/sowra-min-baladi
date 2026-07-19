@@ -429,11 +429,13 @@ function setView(v){
   $('vtGrid').classList.toggle('on',v==='grid');
   $('vtMap').classList.toggle('on',v==='map');
   if(v==='map'){
+     sortMode='map';
     $('mapWrap').style.display='block';
     $('feed').style.display='none';
     $('nearbyWrap').style.display='none';
     renderMap();
   } else {
+    if(sortMode==='map') sortMode=_sort||'top';
     $('mapWrap').style.display='none';
     $('feed').style.display='';
     render();
